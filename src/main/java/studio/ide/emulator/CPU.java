@@ -1,36 +1,54 @@
 package studio.ide.emulator;
 
 public class CPU {
-    private int registerA = 0x00;
-    private int pc = 0x0000;
+    public int a, b, c, d, e, h, l, psw;
+    public int sp, pc;
+    public boolean flagP, flagZ, flagCY, flagAC, flagS; //5 flags
 
     private Memory memory;
+    private InstructionSet instructionSet;
 
     public CPU(Memory memory) {
         this.memory = memory;
+        this.instructionSet = new InstructionSet();
     }
+
+    public int readMemory(int address) {
+        return memory.read(address) & 0xFF;
+    }
+
+    public void writeMemory(int address, int value) {
+        memory.write(address, (byte) value);
+    }
+
+
+    // remember
+    // 000 B
+    // 001 C
+    // 010 D
+    // 011 E
+    // 100 H
+    // 101 L
+    // 110 M
+    // 111 A
+
+    // 00 BC
+    // 01 DE
+    // 10 HL
+    // 11 SP
+
 
     public void step() {
-        int opcode = memory.read(pc);
 
-        switch (opcode) {
-            case 0x3E:
-                pc++;
-                int immediateData = memory.read(pc);
+        int rawOpCode = readMemory(pc);
+        OpCode instruction = instructionSet.table[rawOpCode];
+        int bytes = instructionSet.bytes[rawOpCode];
 
-                this.registerA = immediateData;
+        pc += bytes;
 
-                pc++;
-                break;
+        if (instruction != null) instruction.execute(this);
+        else System.out.println("Invalid Opcode!");
 
-            default:
-                System.out.println("Unknown or unimplemented opcode: " + String.format("0x%02X", opcode));
-                break;
-        }
     }
 
-    public int getRegisterA() { return registerA; }
-    public void setRegisterA(int value) { this.registerA = value; }
-    public int getPc() { return pc; }
-    public void setPc(int pc) { this.pc = pc; }
 }

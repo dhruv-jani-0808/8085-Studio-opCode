@@ -1,4 +1,4 @@
-package studio.emulator;
+package studio.ide.emulator;
 
 public class CPU {
     int a;

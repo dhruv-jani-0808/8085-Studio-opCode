@@ -1,16 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="studio.ide.HelloController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<HBox prefHeight="600.0" prefWidth="900.0" xmlns="http://www.w3.org/javafx/8" xmlns:fx="http://javafx.com/fxml" fx:controller="studio.ide.HelloController">    <children>
 
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+        <VBox prefWidth="60.0" style="-background-color: #2F3136; -fx-alignment: top-center; -fx-spacing: 15; -fx-padding: 10 0 0 0;">
+            <children>
+                <Button fx:id="navFilesBtn" text="Files" prefWidth="50.0"/>
+                <Button fx:id="navRegsBtn" text="Regs" prefWidth="50.0"/>
+            </children>
+        </VBox>
+
+        <VBox fx:id="sidebarPanel" prefWidth="220.0" style="-fx-background-color: #202225; -fx-padding: 15; -fx-spacing: 15;">
+            <children>
+                <Label fx:id="sidebarTitleLabel" text="Registers &amp; Flags" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;"/>
+
+                <GridPane hgap="10" vgap="10" style="-fx-padding: 5;">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="40" prefWidth="50" />
+                        <ColumnConstraints minWidth="80" prefWidth="100" />
+                    </columnConstraints>
+                    <children>
+                        <Label text="Reg A:" style="-fx-text-fill: #888888; -fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <Label fx:id="regALabel" text="00H" style="-fx-text-fill: #43B581; -fx-font-family: 'Courier New'; -fx-font-weight: bold;" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                        <Label text="Reg B:" style="-fx-text-fill: #888888; -fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <Label fx:id="regBLabel" text="00H" style="-fx-text-fill: white; -fx-font-family: 'Courier New';" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                        <Label text="Reg C:" style="-fx-text-fill: #888888; -fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <Label fx:id="regCLabel" text="00H" style="-fx-text-fill: white; -fx-font-family: 'Courier New';" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                        <Label text="PC:" style="-fx-text-fill: #888888; -fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                        <Label fx:id="regPCLabel" text="0000H" style="-fx-text-fill: #7289DA; -fx-font-family: 'Courier New';" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                    </children>
+                </GridPane>
+            </children>
+        </VBox>
+
+        <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: #36393F; -fx-padding: 10; -fx-spacing: 10;">
+            <children>
+                <Label text="Code Editor View" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+
+                <Button fx:id="executeBtn" text="Execute MVI A" style="-fx-background-color: #7289DA; -fx-text-fill: white; -fx-font-weight: bold;"/>
+
+                <TextArea fx:id="editorTextArea" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #2F3136;"/>
+            </children>
+        </VBox>
+
+        <VBox prefWidth="200.0" style="-fx-background-color: #2F3136; -fx-padding: 10;">
+            <children>
+                <Label text="Memory Table" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                <ListView fx:id="memoryListView" VBox.vgrow="ALWAYS"/>
+            </children>
+        </VBox>
+
+    </children>
+</HBox>

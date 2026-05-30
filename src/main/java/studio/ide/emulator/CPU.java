@@ -38,11 +38,9 @@ public class CPU {
     // 11 SP
 
 
-
     public void step() {
 
-        int rawOpCode = memory.read(pc);
-
+        int rawOpCode = readMemory(pc);
         OpCode instruction = instructionSet.table[rawOpCode];
         int bytes = instructionSet.bytes[rawOpCode];
 
@@ -50,7 +48,6 @@ public class CPU {
 
         if (instruction != null) instruction.execute(this);
         else System.out.println("Invalid Opcode!");
-
 
     }
 

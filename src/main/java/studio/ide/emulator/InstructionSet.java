@@ -22,16 +22,10 @@ public class InstructionSet {
     // 11 SP
 
     public InstructionSet() {
-<<<<<<< HEAD
-        //ADD Reg Opcode 1 0 0 0 0 X X X
-        for (int opcode = 0x80; opcode <= 0x87; opcode++) {
-=======
-
         //ADD Reg Opcode 1 0 0 0 0 X X X; 8
         //ADC Reg Opcode 1 0 0 0 1 X X X; 8
         for (int opcode = 0x80; opcode <= 0x8F; opcode++) {
 
->>>>>>> 6b79464a5d5bb8a3203405cd98e05eb6acb6dd04
             final int currHex = opcode;
 
             bytes[currHex] = 1;
@@ -84,7 +78,7 @@ public class InstructionSet {
             doSub(cpu, immediateData, 0);
         };
 
-        //ACI 0xCE
+        //SBI 0xCE
         bytes[0xDE] = 2;
         table[0xDE] = (cpu) -> {
             int immediateData = cpu.readMemory(cpu.pc + 1);
@@ -232,7 +226,36 @@ public class InstructionSet {
             };
         }
 
+        //LDA address
+        bytes[0x3A] = 3;
+        table[0x3A] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+            int address = (higherByte << 8) | lowerByte;
 
+            setRegValue(cpu, 0x07, cpu.readMemory(address));
+        };
+
+        //STA address
+        bytes[0x32] = 3;
+        table[0x32] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+            int address = (higherByte << 8) | lowerByte;
+
+            cpu.writeMemory(address, cpu.a);
+        };
+
+        //LHLD address
+        bytes[0x2A] = 3;
+        table[0x2A] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+            int baseAdress = (higherByte << 8) | lowerByte;
+
+            setRegValue(cpu, 0x05, cpu.readMemory(baseAdress));
+            setRegValue(cpu, 0x04, cpu.readMemory(baseAdress + 1));
+        };
     }
 
     private int getRegValue(CPU cpu, int regCode) {

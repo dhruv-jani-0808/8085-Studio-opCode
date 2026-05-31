@@ -6,10 +6,8 @@ public class InstructionSet {
     public final int[] bytes = new int[256];
 
     public InstructionSet() {
-
         //ADD Reg Opcode 1 0 0 0 0 X X X
         for (int opcode = 0x80; opcode <= 0x87; opcode++) {
-
             final int currHex = opcode;
 
             bytes[currHex] = 1;

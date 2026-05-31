@@ -1,7 +1,7 @@
 package studio.ide.emulator;
 
 public class CPU {
-    public int a, b, c, d, e, h, l, psw;
+    public int a, b, c, d, e, h, l;
     public int sp, pc;
     public boolean flagP, flagZ, flagCY, flagAC, flagS; //5 flags
 
@@ -20,23 +20,6 @@ public class CPU {
     public void writeMemory(int address, int value) {
         memory.write(address, (byte) value);
     }
-
-
-    // remember
-    // 000 B
-    // 001 C
-    // 010 D
-    // 011 E
-    // 100 H
-    // 101 L
-    // 110 M
-    // 111 A
-
-    // 00 BC
-    // 01 DE
-    // 10 HL
-    // 11 SP
-
 
     public void step() {
 

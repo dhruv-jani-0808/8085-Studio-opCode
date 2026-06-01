@@ -256,6 +256,174 @@ public class InstructionSet {
             setRegValue(cpu, 0x05, cpu.readMemory(baseAdress));
             setRegValue(cpu, 0x04, cpu.readMemory(baseAdress + 1));
         };
+
+        //SHLD address
+        bytes[0x22] = 3;
+        table[0x22] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+            int baseAdress = (higherByte << 8) | lowerByte;
+
+            cpu.writeMemory(baseAdress, getRegValue(cpu, 0x05));
+            cpu.writeMemory(baseAdress + 1, getRegValue(cpu, 0x04));
+        };
+
+        //LDAX B
+        bytes[0x0A] = 1;
+        table[0x0A] = (cpu) -> {
+            int address = ((getRegValue(cpu, 0x00) << 8) | getRegValue(cpu, 0x01));
+            setRegValue(cpu, 0x07, cpu.readMemory(address));
+        };
+
+        //LDAX D
+        bytes[0x1A] = 1;
+        table[0x1A] = (cpu) -> {
+            int address = ((getRegValue(cpu, 0x02) << 8) | getRegValue(cpu, 0x03));
+            setRegValue(cpu, 0x07, cpu.readMemory(address));
+        };
+
+        //STAX B
+        bytes[0x02] = 1;
+        table[0x02] = (cpu) -> {
+            int address = ((getRegValue(cpu, 0x00) << 8) | getRegValue(cpu, 0x01));
+            cpu.writeMemory(address, getRegValue(cpu, 0x07));
+        };
+
+        //STAX D
+        bytes[0x12] = 1;
+        table[0x12] = (cpu) -> {
+            int address = ((getRegValue(cpu, 0x02) << 8) | getRegValue(cpu, 0x03));
+            cpu.writeMemory(address, getRegValue(cpu, 0x07));
+        };
+
+        //LXI B, data16
+        bytes[0x01] = 3;
+        table[0x01] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            setRegValue(cpu, 0x00, higherByte);
+            setRegValue(cpu, 0x01, lowerByte);
+        };
+
+        //LXI D, data16
+        bytes[0x11] = 3;
+        table[0x11] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            setRegValue(cpu, 0x02, higherByte);
+            setRegValue(cpu, 0x03, lowerByte);
+        };
+
+        //LXI H, data16
+        bytes[0x21] = 3;
+        table[0x21] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            setRegValue(cpu, 0x04, higherByte);
+            setRegValue(cpu, 0x05, lowerByte);
+        };
+
+        //LXI SP, data16
+        bytes[0x31] = 3;
+        table[0x31] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            cpu.sp = (higherByte << 8) | lowerByte;
+        };
+
+        //JMP address
+        bytes[0xC3] = 3;
+        table[0xC3] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            int targetAddress = (higherByte << 8) | lowerByte;
+            cpu.pc = targetAddress - 3;
+        };
+
+        //JNZ address
+        bytes[0xC2] = 3;
+        table[0xC2] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            int targetAddress = (higherByte << 8) | lowerByte;
+            if(!cpu.flagZ) cpu.pc = targetAddress - 3; // Fixed: Jump if NOT zero
+        };
+
+        //JZ address
+        bytes[0xCA] = 3;
+        table[0xCA] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            int targetAddress = (higherByte << 8) | lowerByte;
+            if(cpu.flagZ) cpu.pc = targetAddress - 3; // Fixed: Jump if zero
+        };
+
+        //JNC address
+        bytes[0xD2] = 3;
+        table[0xD2] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            int targetAddress = (higherByte << 8) | lowerByte;
+            if(!cpu.flagCY) cpu.pc = targetAddress - 3; // Fixed: Jump if NO carry
+        };
+
+        //JC address
+        bytes[0xDA] = 3;
+        table[0xDA] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            int targetAddress = (higherByte << 8) | lowerByte;
+            if(cpu.flagCY) cpu.pc = targetAddress - 3; // Fixed: Jump if carry
+        };
+
+        //JPO address
+        bytes[0xE2] = 3;
+        table[0xE2] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            int targetAddress = (higherByte << 8) | lowerByte;
+            if(!cpu.flagP) cpu.pc = targetAddress - 3; // Fixed: Jump if parity is ODD
+        };
+
+        //JPE address
+        bytes[0xEA] = 3;
+        table[0xEA] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            int targetAddress = (higherByte << 8) | lowerByte;
+            if(cpu.flagP) cpu.pc = targetAddress - 3; // Fixed: Jump if parity is EVEN
+        };
+
+        //JP address
+        bytes[0xF2] = 3;
+        table[0xF2] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            int targetAddress = (higherByte << 8) | lowerByte;
+            if(!cpu.flagS) cpu.pc = targetAddress - 3; // Fixed: Jump if Positive (Sign bit 0)
+        };
+
+        //JM address
+        bytes[0xFA] = 3;
+        table[0xFA] = (cpu) -> {
+            int lowerByte = cpu.readMemory(cpu.pc + 1);
+            int higherByte = cpu.readMemory(cpu.pc + 2);
+
+            int targetAddress = (higherByte << 8) | lowerByte;
+            if(cpu.flagS) cpu.pc = targetAddress - 3; // Fixed: Jump if Minus (Sign bit 1)
+        };
     }
 
     private int getRegValue(CPU cpu, int regCode) {

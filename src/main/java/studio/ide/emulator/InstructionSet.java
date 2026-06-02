@@ -5,7 +5,6 @@ public class InstructionSet {
     public final OpCode[] table = new OpCode[256];
     public final int[] bytes = new int[256];
 
-
     // remember
     // 000 B
     // 001 C
@@ -261,6 +260,106 @@ public class InstructionSet {
             }
         }
 
+        // Conditional Jumps Array Mapping
+        // Index mapping: 0=NZ (0xC2), 1=Z (0xCA), 2=NC (0xD2), 3=C (0xDA),
+        //                4=PO (0xE2), 5=PE (0xEA), 6=P (0xF2), 7=M (0xFA)
+        for (int i = 0; i < 8; i++) {
+            final int condition = i;
+
+            // 1. CONDITIONAL RETURNS (1 Byte) - RNC, RC, RNZ, RZ, etc.
+            int retOpcode = 0xC0 | (condition << 3);
+            bytes[retOpcode] = 1;
+            table[retOpcode] = (cpu) -> {
+                if (evaluateCondition(cpu, condition)) {
+                    int low = cpu.readMemory(cpu.sp);
+                    cpu.sp = (cpu.sp + 1) & 0xFFFF;
+                    int high = cpu.readMemory(cpu.sp);
+                    cpu.sp = (cpu.sp + 1) & 0xFFFF;
+
+                    int returnAddress = (high << 8) | low;
+                    cpu.pc = returnAddress - 1;
+                }
+            };
+
+            // 2. CONDITIONAL JUMPS (3 Bytes) - JNC, JC, JNZ, JZ, etc.
+            int jumpOpcode = 0xC2 | (condition << 3);
+            bytes[jumpOpcode] = 3;
+            table[jumpOpcode] = (cpu) -> {
+                if (evaluateCondition(cpu, condition)) {
+                    int target = cpu.readMemory(cpu.pc + 1) | (cpu.readMemory(cpu.pc + 2) << 8);
+                    cpu.pc = target - 3;
+                }
+            };
+
+            // 3. CONDITIONAL CALLS (3 Bytes) - CNC, CC, CNZ, CZ, etc.
+            int callOpcode = 0xC4 | (condition << 3);
+            bytes[callOpcode] = 3;
+            table[callOpcode] = (cpu) -> {
+                if (evaluateCondition(cpu, condition)) {
+                    int target = cpu.readMemory(cpu.pc + 1) | (cpu.readMemory(cpu.pc + 2) << 8);
+                    int returnAddress = cpu.pc + 3;
+
+                    // PUSH return address to stack
+                    cpu.sp = (cpu.sp - 1) & 0xFFFF;
+                    cpu.writeMemory(cpu.sp, (returnAddress >> 8) & 0xFF);
+                    cpu.sp = (cpu.sp - 1) & 0xFFFF;
+                    cpu.writeMemory(cpu.sp, returnAddress & 0xFF);
+
+                    cpu.pc = target - 3;
+                }
+            };
+
+            // 4. RESTART VECTORS (1 Byte) - RST 0 through RST 7
+            int rstOpcode = 0xC7 | (condition << 3);
+            bytes[rstOpcode] = 1;
+            table[rstOpcode] = (cpu) -> {
+                int returnAddress = cpu.pc + 1;
+
+                cpu.sp = (cpu.sp - 1) & 0xFFFF;
+                cpu.writeMemory(cpu.sp, (returnAddress >> 8) & 0xFF);
+                cpu.sp = (cpu.sp - 1) & 0xFFFF;
+                cpu.writeMemory(cpu.sp, returnAddress & 0xFF);
+
+                int targetVector = condition * 8;
+
+                cpu.pc = targetVector - 1;
+            };
+        }
+
+        // exceptions
+        // JMP Unconditional (0xC3) - 3 Bytes
+        bytes[0xC3] = 3;
+        table[0xC3] = (cpu) -> {
+            cpu.pc = (cpu.readMemory(cpu.pc + 1) | (cpu.readMemory(cpu.pc + 2) << 8));
+        };
+
+        // RET Unconditional (0xC9) - 1 Byte
+        bytes[0xC9] = 1;
+        table[0xC9] = (cpu) -> {
+            int low = cpu.readMemory(cpu.sp);
+            cpu.sp = (cpu.sp + 1) & 0xFFFF;
+            int high = cpu.readMemory(cpu.sp);
+            cpu.sp = (cpu.sp + 1) & 0xFFFF;
+
+            int returnAddress = (high << 8) | low;
+            cpu.pc = returnAddress - 1;
+        };
+
+        // CALL Unconditional (0xCD) - 3 Bytes
+        bytes[0xCD] = 3;
+        table[0xCD] = (cpu) -> {
+            int target = cpu.readMemory(cpu.pc + 1) | (cpu.readMemory(cpu.pc + 2) << 8);
+
+            int returnAddress = cpu.pc + 3;
+
+            cpu.sp = (cpu.sp - 1) & 0xFFFF;
+            cpu.writeMemory(cpu.sp, (returnAddress >> 8) & 0xFF);
+            cpu.sp = (cpu.sp - 1) & 0xFFFF;
+            cpu.writeMemory(cpu.sp, returnAddress & 0xFF);
+
+            cpu.pc = target - 3;
+        };
+
         // LDA address (0x3A)
         bytes[0x3A] = 3;
         table[0x3A] = (cpu) -> {
@@ -291,56 +390,172 @@ public class InstructionSet {
             cpu.writeMemory(address + 1, getRegValue(cpu, 4)); // Store H
         };
 
-        // Unconditional JMP (0xC3)
-        bytes[0xC3] = 3;
-        table[0xC3] = (cpu) -> {
-            cpu.pc = (cpu.readMemory(cpu.pc + 1) | (cpu.readMemory(cpu.pc + 2) << 8));
+        // Hardware I/O Group
+        bytes[0xDB] = 2;
+        table[0xDB] = (cpu) -> {
+            int port = cpu.readMemory(cpu.pc + 1);
+            // IN port implementation placeholder (returns 0 or hooks to your I/O subsystem)
+            setRegValue(cpu, 7, 0x00);
         };
 
-        // Conditional Jumps Array Mapping
-        // Index mapping: 0=NZ (0xC2), 1=Z (0xCA), 2=NC (0xD2), 3=C (0xDA),
-        //                4=PO (0xE2), 5=PE (0xEA), 6=P (0xF2), 7=M (0xFA)
-        for (int i = 0; i < 8; i++) {
-            int jumpOpcode = 0xC2 | (i << 3);
-            bytes[jumpOpcode] = 3;
+        bytes[0xD3] = 2;
+        table[0xD3] = (cpu) -> {
+            int port = cpu.readMemory(cpu.pc + 1);
+            // OUT port implementation placeholder (sends cpu.a value to your I/O subsystem)
+        };
 
-            table[jumpOpcode] = (cpu) -> {
-                int conditionCode = (jumpOpcode >> 3) & 0x07;
-                boolean shouldJump = false;
+        // 16-Bit Register Pointer & Math Extensions
+        bytes[0xEB] = 1;
+        table[0xEB] = (cpu) -> {
+            int tempH = cpu.h;
+            int tempL = cpu.l;
+            cpu.h = cpu.d;
+            cpu.l = cpu.e;
+            cpu.d = tempH;
+            cpu.e = tempL;
+        };
 
-                switch (conditionCode) {
-                    case 0:
-                        shouldJump = !cpu.flagZ;
-                        break; // JNZ
-                    case 1:
-                        shouldJump = cpu.flagZ;
-                        break; // JZ
-                    case 2:
-                        shouldJump = !cpu.flagCY;
-                        break; // JNC
-                    case 3:
-                        shouldJump = cpu.flagCY;
-                        break; // JC
-                    case 4:
-                        shouldJump = !cpu.flagP;
-                        break; // JPO
-                    case 5:
-                        shouldJump = cpu.flagP;
-                        break; // JPE
-                    case 6:
-                        shouldJump = !cpu.flagS;
-                        break; // JP
-                    case 7:
-                        shouldJump = cpu.flagS;
-                        break; // JM
-                }
+        bytes[0xE3] = 1;
+        table[0xE3] = (cpu) -> {
+            int low = cpu.readMemory(cpu.sp);
+            int high = cpu.readMemory((cpu.sp + 1) & 0xFFFF);
+            cpu.writeMemory(cpu.sp, cpu.l);
+            cpu.writeMemory((cpu.sp + 1) & 0xFFFF, cpu.h);
+            cpu.l = low;
+            cpu.h = high;
+        };
 
-                if (shouldJump) {
-                    cpu.pc = (cpu.readMemory(cpu.pc + 1) | (cpu.readMemory(cpu.pc + 2) << 8)) - 3;
-                }
-            };
-        }
+        bytes[0xF9] = 1;
+        table[0xF9] = (cpu) -> {
+            cpu.sp = getPairValue(cpu, 2);
+        };
 
+        bytes[0xE9] = 1;
+        table[0xE9] = (cpu) -> {
+            cpu.pc = getPairValue(cpu, 2) - 1;
+        };
+
+        bytes[0x27] = 1;
+        table[0x27] = (cpu) -> {
+            int res = cpu.a;
+            if ((res & 0x0F) > 9 || cpu.flagAC) {
+                res += 6;
+                cpu.flagAC = ((cpu.a ^ res) & 0x10) != 0;
+            }
+            if ((res > 0x9F) || cpu.flagCY) {
+                res += 0x60;
+                cpu.flagCY = true;
+            }
+            setZSP(cpu, res & 0xFF);
+            cpu.a = res & 0xFF;
+        };
+
+        // Carry & Bit Control Group
+        bytes[0x37] = 1;
+        table[0x37] = (cpu) -> {
+            cpu.flagCY = true;
+        };
+
+        bytes[0x3F] = 1;
+        table[0x3F] = (cpu) -> {
+            cpu.flagCY = !cpu.flagCY;
+        };
+
+        bytes[0x07] = 1;
+        table[0x07] = (cpu) -> {
+            int bit = (cpu.a >> 7) & 1;
+            cpu.a = ((cpu.a << 1) | bit) & 0xFF;
+            cpu.flagCY = (bit == 1);
+        };
+
+        // RLC (0x07) - Rotate Left Circular
+        bytes[0x07] = 1;
+        table[0x07] = (cpu) -> {
+            int bit = (cpu.a >> 7) & 1;
+            cpu.a = ((cpu.a << 1) | bit) & 0xFF;
+            cpu.flagCY = (bit == 1);
+        };
+
+        // RRC (0x0F) - Rotate Right Circular
+        bytes[0x0F] = 1;
+        table[0x0F] = (cpu) -> {
+            int bit = cpu.a & 1;
+            cpu.a = ((cpu.a >> 1) | (bit << 7)) & 0xFF;
+            cpu.flagCY = (bit == 1);
+        };
+
+        // RAL (0x17) - Rotate Left through Carry
+        bytes[0x17] = 1;
+        table[0x17] = (cpu) -> {
+            int bit = (cpu.a >> 7) & 1;
+            cpu.a = ((cpu.a << 1) | (cpu.flagCY ? 1 : 0)) & 0xFF;
+            cpu.flagCY = (bit == 1);
+        };
+
+        // RAR (0x1F) - Rotate Right through Carry
+        bytes[0x1F] = 1;
+        table[0x1F] = (cpu) -> {
+            int bit = cpu.a & 1;
+            cpu.a = ((cpu.a >> 1) | ((cpu.flagCY ? 1 : 0) << 7)) & 0xFF;
+            cpu.flagCY = (bit == 1);
+        };
+
+        // Carry & Bit Control Group
+        bytes[0x37] = 1;
+        table[0x37] = (cpu) -> {
+            cpu.flagCY = true;
+        };
+
+        bytes[0x3F] = 1;
+        table[0x3F] = (cpu) -> {
+            cpu.flagCY = !cpu.flagCY;
+        };
+
+        // DI (0xF3) - Disable Interrupts
+        bytes[0xF3] = 1;
+        table[0xF3] = (cpu) -> {
+            cpu.interruptEnabled = false;
+        };
+
+        // EI (0xFB) - Enable Interrupts
+        bytes[0xFB] = 1;
+        table[0xFB] = (cpu) -> {
+            cpu.interruptEnabled = true;
+        };
+
+        // RIM (0x20) - Read Interrupt Mask
+        bytes[0x20] = 1;
+        table[0x20] = (cpu) -> {
+            int rimByte = 0x00;
+            // Bits 0-2: Current restart interrupt masks
+            rimByte |= (cpu.interruptMasks & 0x07);
+            // Bit 3: Interrupt Enable status
+            if (cpu.interruptEnabled) rimByte |= 0x08;
+
+
+            setRegValue(cpu, 7, rimByte); // Load into Reg A
+        };
+
+        // SIM (0x30) - Set Interrupt Mask
+        bytes[0x30] = 1;
+        table[0x30] = (cpu) -> {
+            int regA = getRegValue(cpu, 7);
+            if ((regA & 0x08) != 0) {
+                cpu.interruptMasks = regA & 0x07;
+            }
+        };
+
+        // Core Machine States
+        bytes[0x00] = 1;
+        table[0x00] = (cpu) -> {
+            // NOP - No Operation
+        };
+
+        // HLT (0x76) - Halt
+        bytes[0x76] = 1;
+        table[0x76] = (cpu) -> {
+            cpu.isHalted = true;
+        };
     }
 
     private int getRegValue(CPU cpu, int regCode) {
@@ -482,6 +697,20 @@ public class InstructionSet {
             case 3: // SP
                 cpu.sp = value & 0xFFFF;
                 break;
+        }
+    }
+
+    private boolean evaluateCondition(CPU cpu, int conditionCode) {
+        switch (conditionCode) {
+            case 0: return !cpu.flagZ;   // NZ
+            case 1: return cpu.flagZ;    // Z
+            case 2: return !cpu.flagCY;  // NC
+            case 3: return cpu.flagCY;   // C
+            case 4: return !cpu.flagP;   // PO
+            case 5: return cpu.flagP;    // PE
+            case 6: return !cpu.flagS;   // P (Positive)
+            case 7: return cpu.flagS;    // M (Minus)
+            default: return false;
         }
     }
 }

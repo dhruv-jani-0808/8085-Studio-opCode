@@ -22,38 +22,68 @@ public class InstructionSet {
     // 11 SP
 
     public InstructionSet() {
-        //ADD Reg Opcode 1 0 0 0 0 X X X; 8
-        //ADC Reg Opcode 1 0 0 0 1 X X X; 8
-        for (int opcode = 0x80; opcode <= 0x8F; opcode++) {
 
-            final int currHex = opcode;
+        //UNIFIED LOOP FOR ALL ALU INR DCR MVI
 
-            bytes[currHex] = 1;
+        for (int regCode = 0; regCode < 8; ++regCode) {
+            final int reg = regCode;
 
-            table[currHex] = (cpu) -> {
-                int srcReg = currHex & 0x07;
-                int addend = getRegValue(cpu, srcReg);
-                boolean isADC = (currHex & 0x08) != 0;
-                int carryIn = (isADC && cpu.flagCY) ? 1 : 0;
-                doAdd(cpu, addend, carryIn);
+            //ADD
+            bytes[0x80 | reg] = 1;
+            table[0x80 | reg] = (cpu) -> doAdd(cpu, getRegValue(cpu, reg), 0);
+
+            //ADC
+            bytes[0x88 | reg] = 1;
+            table[0x88 | reg] = (cpu) -> doAdd(cpu, getRegValue(cpu, reg), cpu.flagCY ? 1 : 0);
+
+            //SUB
+            bytes[0x90 | reg] = 1;
+            table[0x90 | reg] = (cpu) -> doSub(cpu, getRegValue(cpu, reg), 0);
+
+            //SBB
+            bytes[0x98 | reg] = 1;
+            table[0x98 | reg] = (cpu) -> doSub(cpu, getRegValue(cpu, reg), cpu.flagCY ? 1 : 0);
+
+            //ANA
+            bytes[0xA0 | reg] = 1;
+            table[0xA0 | reg] = (cpu) -> doAnd(cpu, getRegValue(cpu, reg));
+
+            //XRA
+            bytes[0xA8 | reg] = 1;
+            table[0xA8 | reg] = (cpu) -> doXor(cpu, getRegValue(cpu, reg));
+
+            //ORA
+            bytes[0xB0 | reg] = 1;
+            table[0xB0 | reg] = (cpu) -> doOr(cpu, getRegValue(cpu, reg));
+
+            //CMP
+            bytes[0xB8 | reg] = 1;
+            table[0xB8 | reg] = (cpu) -> doCmp(cpu, getRegValue(cpu, reg));
+
+            //INR
+            int inrOpC =  0x04 | (reg << 3);
+            bytes[inrOpC] = 1;
+            table[inrOpC] = (cpu) -> {
+                int val = getRegValue(cpu, reg);
+                setRegValue(cpu, reg, doInr(cpu, val));
             };
-        }
 
-        //SUB Reg Opcode 1 0 0 1 0 X X X; 8
-        //SBB Reg Opcode 1 0 0 1 1 X X X; 8
-        for (int opcode = 0x90; opcode <= 0x9F; opcode++) {
-
-            final int currHex = opcode;
-
-            bytes[currHex] = 1;
-
-            table[currHex] = (cpu) -> {
-                int srcReg = currHex & 0x07;
-                int subtrahend = getRegValue(cpu, srcReg);
-                boolean isSBB = (currHex & 0x08) != 0;
-                int borrowIn = (isSBB && cpu.flagCY) ? 1 : 0;
-                doSub(cpu, subtrahend, borrowIn);
+            //DCR
+            int dcrOpC =  0x05 | (reg << 3);
+            bytes[dcrOpC] = 1;
+            table[dcrOpC] = (cpu) -> {
+                int val = getRegValue(cpu, reg);
+                setRegValue(cpu, reg, doDcr(cpu, val));
             };
+
+            //MVI
+            int mviOpC =  0x06 | (reg << 3);
+            bytes[mviOpC] = 2;
+            table[mviOpC] = (cpu) -> {
+                int immediateData = cpu.readMemory(cpu.pc + 1);
+                setRegValue(cpu, reg, immediateData);
+            };
+
         }
 
         //ADI 0xC6
@@ -78,85 +108,13 @@ public class InstructionSet {
             doSub(cpu, immediateData, 0);
         };
 
-        //SBI 0xCE
+        //SBI 0xDE
         bytes[0xDE] = 2;
         table[0xDE] = (cpu) -> {
             int immediateData = cpu.readMemory(cpu.pc + 1);
             int borrowIn = cpu.flagCY ? 1 : 0;
             doSub(cpu, immediateData, borrowIn);
         };
-
-        //ANA 1 0 1 0 0 X X X
-        for (int opcode = 0xA0; opcode <= 0xA7; opcode++) {
-            final int currHex = opcode;
-            bytes[currHex] = 1;
-
-            table[currHex] = (cpu) -> {
-                int srcReg = currHex & 0x07;
-                int operand = getRegValue(cpu, srcReg);
-                doAnd(cpu, operand);
-            };
-        }
-
-        //XRA 1 0 1 0 1 X X X
-        for (int opcode = 0xA8; opcode <= 0xAF; opcode++) {
-            final int currHex = opcode;
-            bytes[currHex] = 1;
-
-            table[currHex] = (cpu) -> {
-                int srcReg = currHex & 0x07;
-                int operand = getRegValue(cpu, srcReg);
-                doXor(cpu, operand);
-            };
-        }
-
-        //ORA 1 0 1 1 0 X X X
-        for (int opcode = 0xB0; opcode <= 0xB7; opcode++) {
-            final int currHex = opcode;
-            bytes[currHex] = 1;
-
-            table[currHex] = (cpu) -> {
-                int srcReg = currHex & 0x07;
-                int operand = getRegValue(cpu, srcReg);
-                doOr(cpu, operand);
-            };
-        }
-
-        //CMP 1 0 1 1 0 X X X
-        for (int opcode = 0xB8; opcode <= 0xBF; opcode++) {
-            final int currHex = opcode;
-            bytes[currHex] = 1;
-
-            table[currHex] = (cpu) -> {
-                int srcReg = currHex & 0x07;
-                int operand = getRegValue(cpu, srcReg);
-                doCmp(cpu, operand);
-            };
-        }
-
-        //INR 0 0 D D D 1 0 0
-        for (int opcode = 0x04; opcode <= 0x3C; opcode += 0x08) {
-            final int currHex = opcode;
-            bytes[currHex] = 1;
-
-            table[currHex] = (cpu) -> {
-                int targetReg = (currHex >> 3) & 0x07;
-                int val = getRegValue(cpu, targetReg);
-                setRegValue(cpu, targetReg, doInr(cpu, val));
-            };
-        }
-
-        //DCR 0 0 D D D 1 0 1
-        for (int opcode = 0x05; opcode <= 0x3D; opcode += 0x08) {
-            final int currHex = opcode;
-            bytes[currHex] = 1;
-
-            table[currHex] = (cpu) -> {
-                int targetReg = (currHex >> 3) & 0x07;
-                int val = getRegValue(cpu, targetReg);
-                setRegValue(cpu, targetReg, doDcr(cpu, val));
-            };
-        }
 
         // ANI
         bytes[0xE6] = 2;
@@ -166,7 +124,7 @@ public class InstructionSet {
         };
 
         // XRI
-        bytes[0xEe] = 2;
+        bytes[0xEE] = 2;
         table[0xEE] = (cpu) -> {
             int immediateData = cpu.readMemory(cpu.pc + 1);
             doXor(cpu, immediateData);
@@ -192,35 +150,115 @@ public class InstructionSet {
             cpu.a = (~cpu.a) & 0xFF;
         };
 
+        //MOV Reg, Reg Opcode 0 1 D D D S S S; 63
+        for (int dest = 0; dest < 8; ++dest) {
+            for (int src = 0; src < 8; ++src) {
 
-        //MVI Reg Opcode 0 0 X X X 1 0 0; 8
-        for (int opcode = 0x06; opcode <= 0x3E; opcode += 0x08) {
+                if (dest == 6 && src == 6) continue;
 
-            final int currHex = opcode;
+                final int target = dest;
+                final int source = src;
 
-            bytes[currHex] = 2;
+                int opcode = 0x40 | (dest << 3) | src;
 
-            table[currHex] = (cpu) -> {
-                int destReg = (currHex >> 3) & 0x07;
-                int immediateData = cpu.readMemory(cpu.pc + 1);
-                setRegValue(cpu, destReg, immediateData);
-            };
+                bytes[opcode] = 1;
+                table[opcode] = (cpu) -> {
+                    int value = getRegValue(cpu, source);
+                    setRegValue(cpu, target, value);
+                };
+            }
         }
 
-        //MOV Reg, Reg Opcode 0 1 D D D S S S; 63
-        for (int opcode = 0x40; opcode <= 0x7F; opcode++) {
-            final int currHex = opcode;
-            bytes[currHex] = 1;
+        //Reg Pair 28 Opcodes
+        for (int regPairCode = 0; regPairCode < 4; ++regPairCode) {
 
-            if (currHex == 0x76) continue;
+            final int rp = regPairCode;
 
-            table[currHex] = (cpu) -> {
-                int destReg = (currHex >> 3) & 0x07;
-                int srcReg = currHex & 0x07;
-
-                int value = getRegValue(cpu, srcReg);
-                setRegValue(cpu, destReg, value);
+            //LXI
+            bytes[0x01 | (rp << 4)] = 3;
+            table[0x01 | (rp << 4)] = (cpu) -> {
+                int immediateData = (cpu.readMemory(cpu.pc + 2) << 8) | cpu.readMemory(cpu.pc + 1);
+                setPairValue(cpu, rp, immediateData);
             };
+
+            //INX
+            bytes[0x03 | (rp << 4)] = 1;
+            table[0x03 | (rp << 4)] = (cpu) -> {
+                int val = getPairValue(cpu, rp);
+                setPairValue(cpu, rp, (val + 1) & 0xFFFF);
+            };
+
+            //DCX
+            bytes[0x0B | (rp << 4)] = 1;
+            table[0x0B | (rp << 4)] = (cpu) -> {
+                int val = getPairValue(cpu, rp);
+                setPairValue(cpu, rp, (val - 1) & 0xFFFF);
+            };
+
+            //DAD
+            bytes[0x09 | (rp << 4)] = 1;
+            table[0x09 | (rp << 4)] = (cpu) -> {
+                int hl = getPairValue(cpu, 2);
+                int pairVal = getPairValue(cpu, rp);
+                int result = hl + pairVal;
+
+                cpu.flagCY = (result > 0xFFFF);
+                setPairValue(cpu, 2, result & 0xFFFF);
+            };
+
+            //PUSH
+            bytes[0xC5 | (rp << 4)] = 1;
+            table[0xC5 | (rp << 4)] = (cpu) -> {
+
+                int valToPush = (rp == 3) ? ((cpu.a << 8) | cpu.getPSW()) : getPairValue(cpu, rp);
+
+                cpu.sp = (cpu.sp - 1) & 0xFFFF;
+                cpu.writeMemory(cpu.sp, (valToPush >> 8) & 0xFF);
+
+                cpu.sp = (cpu.sp - 1) & 0xFFFF;
+                cpu.writeMemory(cpu.sp, valToPush & 0xFF);
+
+            };
+
+            //POP
+            bytes[0xC1 | (rp << 4)] = 1;
+            table[0xC1 |(rp << 4)] = (cpu) -> {
+
+                int low = cpu.readMemory(cpu.sp);
+                cpu.sp = (cpu.sp + 1) & 0xFFFF;
+
+                int high = cpu.readMemory(cpu.sp);
+                cpu.sp = (cpu.sp + 1) & 0xFFFF;
+
+                if (rp == 3) {
+                    cpu.a = high;
+                    cpu.setPSW(low);
+                }
+
+                else {
+                    setPairValue(cpu, rp, (high << 8) | low);
+                }
+            };
+
+            if (rp < 2) {
+
+                //STAX
+                bytes[0x02 | (rp << 4)] = 1;
+                table[0x02 | (rp << 4)] = (cpu) -> {
+                    int address = getPairValue(cpu, rp);
+                    int accumulator = getRegValue(cpu, 7);
+                    cpu.writeMemory(address, accumulator);
+                };
+
+                //LDAX
+                bytes[0x0A | (rp << 4)] = 1;
+                table[0x0A | (rp << 4)] = (cpu) -> {
+                    int address = getPairValue(cpu, rp);
+                    int value = cpu.readMemory(address);
+                    setRegValue(cpu, 7, value);
+                };
+
+            }
         }
 
         // LDA address (0x3A)
@@ -253,43 +291,10 @@ public class InstructionSet {
             cpu.writeMemory(address + 1, getRegValue(cpu, 4)); // Store H
         };
 
-        // LDAX Pair (0x0A, 0x1A) and STAX Pair (0x02, 0x12)
-        // Format: 00XX0010 (STAX) and 00XX1010 (LDAX) where XX is pair 0 (BC) or 1 (DE)
-        for (int pair = 0; pair <= 1; pair++) {
-            int staxOpcode = 0x02 | (pair << 4);
-            int ldaxOpcode = 0x0A | (pair << 4);
-
-            // STAX pair
-            bytes[staxOpcode] = 1;
-            table[staxOpcode] = (cpu) -> {
-                int currentPair = (staxOpcode >> 4) & 0x03;
-                cpu.writeMemory(getPairValue(cpu, currentPair), cpu.a);
-            };
-
-            // LDAX pair
-            bytes[ldaxOpcode] = 1;
-            table[ldaxOpcode] = (cpu) -> {
-                int currentPair = (ldaxOpcode >> 4) & 0x03;
-                setRegValue(cpu, 7, cpu.readMemory(getPairValue(cpu, currentPair)));
-            };
-        }
-
-        // LXI Pair, data16 (0x01, 0x11, 0x21, 0x31)
-        // Format: 00XX0001 where XX ranges from 0 to 3 (BC, DE, HL, SP)
-        for (int opcode = 0x01; opcode <= 0x31; opcode += 0x10) {
-            final int currHex = opcode;
-            bytes[currHex] = 3;
-            table[currHex] = (cpu) -> {
-                int targetPair = (currHex >> 4) & 0x03;
-                int immediate16 = cpu.readMemory(cpu.pc + 1) | (cpu.readMemory(cpu.pc + 2) << 8);
-                setPairValue(cpu, targetPair, immediate16);
-            };
-        }
-
         // Unconditional JMP (0xC3)
         bytes[0xC3] = 3;
         table[0xC3] = (cpu) -> {
-            cpu.pc = (cpu.readMemory(cpu.pc + 1) | (cpu.readMemory(cpu.pc + 2) << 8)) - 3;
+            cpu.pc = (cpu.readMemory(cpu.pc + 1) | (cpu.readMemory(cpu.pc + 2) << 8));
         };
 
         // Conditional Jumps Array Mapping
@@ -335,6 +340,7 @@ public class InstructionSet {
                 }
             };
         }
+
     }
 
     private int getRegValue(CPU cpu, int regCode) {

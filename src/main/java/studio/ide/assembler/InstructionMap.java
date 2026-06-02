@@ -21,7 +21,7 @@ public class InstructionMap {
                 "NZ", "Z", "NC", "C", "PO", "PE", "P", "M"
         };
 
-        //MOV and HLT 64
+       //MOV and HLT 64
        for (int dest = 0; dest <= 7; ++dest) {
            for (int src = 0; src <= 7; ++src) {
                if (dest == 6 && src == 6) map.put("HLT", new int[]{0x76, 1});
@@ -157,7 +157,4 @@ public class InstructionMap {
     public static int[] getInstructionData(String instructionStr) {
         return map.get(instructionStr);
     }
-
-
-
 }

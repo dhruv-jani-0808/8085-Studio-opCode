@@ -112,6 +112,39 @@ public class Assembler {
         // =====================================================================
 
         // TODO: Implement Pass 2 loop here.
+        for(ParsedLine line : parsedLines) {
+            String lookup = buildLookupString(line);
+            int[] data = InstructionMap.getInstructionData(lookup);
+
+            if(data == null) {
+                System.err.println("Syntax Error on pass2 : invalid instruction -> " + lookup);
+                continue;
+            }
+
+            int opcode = data[0];
+            int instructionSize = data[1];
+
+            machineCode.add(opcode);
+
+            if(instructionSize > 1) {
+                String rawOpearand = (line.operand2 != null && !line.operand2.isEmpty()) ? line.operand2 : line.operand1;
+
+                int resolvedValue = parseOperandValue(rawOpearand);
+
+                if(instructionSize == 2) {
+                    // 2-Byte Instruction: Append the single 8-bit literal byte directly
+                    machineCode.add(resolvedValue & 0xFF);
+                }
+                else if(instructionSize == 3) {
+                    // 3-Byte Instruction: Break 16-bit address using Little-Endian rules
+                    int lowByte = resolvedValue & 0xFF;
+                    int highByte = (resolvedValue >> 8) & 0xFF;
+
+                    machineCode.add(lowByte);
+                    machineCode.add(highByte);
+                }
+            }
+        }
     }
 
     // --- The Lexer ---
@@ -194,5 +227,29 @@ public class Assembler {
             finalBytes[i] = machineCode.get(i).byteValue();
         }
         return finalBytes;
+    }
+
+    private int parseOperandValue(String operand) {
+        if (operand == null || operand.isEmpty()) {
+            return 0;
+        }
+
+        // 1. Is it a text label sitting in our Symbol Table?
+        if (symbolTable.containsKey(operand)) {
+            return symbolTable.get(operand);
+        }
+
+        // 2. Is it a Hexadecimal constant? (e.g., "55H", "2000H")
+        if (operand.endsWith("H")) {
+            String cleanHex = operand.substring(0, operand.length() - 1);
+            return Integer.parseInt(cleanHex, 16);
+        }
+
+        // 3. Otherwise, treat it as a standard decimal integer base-10
+        try {
+            return Integer.parseInt(operand);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Assembler Error: Unresolved literal token -> " + operand);
+        }
     }
 }

@@ -1,6 +1,7 @@
 module studio.ide {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.sql;
 
     // Open packages containing FXML files or Controllers to the FXML engine
     opens studio.ide to javafx.fxml;

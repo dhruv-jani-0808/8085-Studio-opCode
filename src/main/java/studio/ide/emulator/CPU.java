@@ -8,6 +8,8 @@ public class CPU {
     public boolean interruptEnabled = false;
     public int interruptMasks = 0x00; // Tracks masked states for RST 5.5, 6.5, 7.5
     public boolean isHalted = false;
+    //Tracks if the current instruction modified the PC
+    public boolean jumped = false;
 
     private Memory memory;
     private InstructionSet instructionSet;
@@ -54,9 +56,9 @@ public class CPU {
         int bytes = instructionSet.bytes[rawOpCode];
 
         if (instruction != null) {
-            int oldPc = pc;
+            jumped = false;
             instruction.execute(this);
-            if (pc == oldPc) pc += bytes;
+            if (!jumped) pc = (pc + bytes) & 0xFFFF;
         }
         else {
             System.out.println("Invalid Opcode: 0x" + String.format("%02X", rawOpCode) + " at PC: 0x" + String.format("%04X", pc));

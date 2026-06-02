@@ -5,6 +5,10 @@ public class CPU {
     public int sp, pc;
     public boolean flagP, flagZ, flagCY, flagAC, flagS; //5 flags
 
+    public boolean interruptEnabled = false;
+    public int interruptMasks = 0x00; // Tracks masked states for RST 5.5, 6.5, 7.5
+    public boolean isHalted = false;
+
     private Memory memory;
     private InstructionSet instructionSet;
 
@@ -49,8 +53,6 @@ public class CPU {
         OpCode instruction = instructionSet.table[rawOpCode];
         int bytes = instructionSet.bytes[rawOpCode];
 
-        pc += bytes;
-
         if (instruction != null) {
             int oldPc = pc;
             instruction.execute(this);
@@ -58,7 +60,5 @@ public class CPU {
         }
 
         else System.out.println("Invalid Opcode!");
-
     }
-
 }

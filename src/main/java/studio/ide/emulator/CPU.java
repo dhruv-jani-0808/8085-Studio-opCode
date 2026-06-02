@@ -58,7 +58,21 @@ public class CPU {
             instruction.execute(this);
             if (pc == oldPc) pc += bytes;
         }
+        else {
+            System.out.println("Invalid Opcode: 0x" + String.format("%02X", rawOpCode) + " at PC: 0x" + String.format("%04X", pc));
+            pc++;
+        }
+    }
 
-        else System.out.println("Invalid Opcode!");
+    public int getRegisterA() {
+        return this.a;
+    }
+
+    public int getPc() {
+        return this.pc;
+    }
+
+    public void setPc(int pc) {
+        this.pc = pc & 0xFFFF;
     }
 }

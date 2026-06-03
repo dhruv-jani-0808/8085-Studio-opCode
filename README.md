@@ -22,7 +22,7 @@ The codebase is modularly designed, separating the UI from the emulator backend:
 - `studio.ide.emulator.Memory`: Simulates the 64KB physical RAM array.
 - `studio.ide.emulator.CPU`: Glues the Memory and Instruction Set together, keeping track of registers and executing instruction cycles.
 - `studio.ide.emulator.InstructionSet`: Contains the core logic for all 8085 opcodes, wired up via a dispatch table mapping hex values to executable lambda functions.
-- `studio.ide.HelloApplication`: The JavaFX entry point that loads the FXML UI.
+- `studio.ide.StudioApplication`: The JavaFX entry point that loads the FXML UI.
 - `studio.ide.HelloController`: The bridge between the JavaFX frontend and the CPU emulator backend.
 
 ## How to Run

@@ -1,6 +1,8 @@
 package studio.ide.ui;
 
+import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
@@ -8,7 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 public class EditorView {
-    private TextArea mainCodeEditor;
+    @FXML private TextArea mainCodeEditor;
     private File currentOpenFile = null;
 
     /**
@@ -21,11 +23,15 @@ public class EditorView {
     /**
      * Opens a native OS dialog file browser to read an assembly text document into the pane.
      */
-    public void handleOpenFile(Stage stage) {
+    @FXML
+    public void handleOpenFile() {
+
+        Stage stage = (Stage) mainCodeEditor.getScene().getWindow();
+
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open 8085 Aseembly File");
+        fileChooser.setTitle("Open 8085 Assembly File");
         fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Aseembly Files (*.asm, *.txt", "*.asm", "*.txt")
+                new FileChooser.ExtensionFilter("Assembly Files (*.asm, *.txt)", "*.asm", "*.txt")
         );
 
         File selectedFile = fileChooser.showOpenDialog(stage);
@@ -36,7 +42,7 @@ public class EditorView {
                 currentOpenFile = selectedFile;
             }
             catch (IOException e) {
-                System.err.println("Failed to read the file: " + e.getMessage());
+                showError("File Error", "Failed to access file:\n" + e.getMessage());
             }
         }
     }
@@ -44,24 +50,29 @@ public class EditorView {
     /**
      * Saves the current text buffer out to the active file, or opens a "Save As" menu if new.
      */
-    public void handleSaveFile(Stage stage) {
+    @FXML
+    public void handleSaveFile() {
         if(currentOpenFile != null) {
             try {
                 Files.writeString(currentOpenFile.toPath(), mainCodeEditor.getText());
             }
             catch (IOException e) {
-                System.err.println("Failed to save file: " + e.getMessage());
+                showError("File Error", "Failed to access file:\n" + e.getMessage());
             }
         }
         else {
-            handleSaveAsFile(stage);
+            handleSaveAsFile();
         }
     }
 
-    public void handleSaveAsFile(Stage stage) {
+    @FXML
+    public void handleSaveAsFile() {
+
+        Stage stage = (Stage) mainCodeEditor.getScene().getWindow();
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Assembly File");
-        fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter("Assembly Files (*.asm)", "*.asm"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Assembly Files (*.asm)", "*.asm"));
 
         File file = fileChooser.showSaveDialog(stage);
         if(file != null) {
@@ -70,8 +81,17 @@ public class EditorView {
                 currentOpenFile = file;
             }
             catch (IOException e) {
-                System.err.println("Failed to write new file: " + e.getMessage());
+                showError("File Error", "Failed to access file:\n" + e.getMessage());
             }
         }
+    }
+
+    // A quick helper method to display GUI error popups
+    private void showError(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

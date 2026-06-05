@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="studio.ide.ui.SidebarView"
+      prefWidth="250"
+      style="-fx-background-color: #252526; -fx-border-color: #333333; -fx-border-width: 0 1 0 0;">
+
+    <HBox spacing="5" style="-fx-padding: 10;">
+        <Button text="Files" onAction="#triggerShowFiles" style="-fx-background-color: #333333; -fx-text-fill: white;" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+        <Button text="Registers" onAction="#triggerShowRegisters" style="-fx-background-color: #333333; -fx-text-fill: white;" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+    </HBox>
+
+    <Label fx:id="sidebarTitleLabel" text="Registers &amp; Flags" style="-fx-text-fill: #cccccc; -fx-font-weight: bold; -fx-padding: 5 10 10 10;"/>
+
+    <StackPane VBox.vgrow="ALWAYS">
+
+        <VBox fx:id="fileExplorerPane" visible="false" managed="false" style="-fx-padding: 10;">
+            <Label text="Working Directory" style="-fx-text-fill: #888888;"/>
+            <Label text="No folder opened." style="-fx-text-fill: #d4d4d4; -fx-padding: 10 0 0 0;"/>
+        </VBox>
+
+        <VBox fx:id="registersPane" spacing="8" style="-fx-padding: 10;">
+            <Label text="Main Registers" style="-fx-text-fill: #888888; -fx-font-size: 11px;"/>
+            <Label fx:id="regALabel" text="A: 00H" style="-fx-text-fill: #569cd6; -fx-font-family: 'Consolas', monospace;"/>
+            <Label fx:id="regBLabel" text="B: 00H" style="-fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace;"/>
+            <Label fx:id="regCLabel" text="C: 00H" style="-fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace;"/>
+            <Label fx:id="regDLabel" text="D: 00H" style="-fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace;"/>
+            <Label fx:id="regELabel" text="E: 00H" style="-fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace;"/>
+            <Label fx:id="regHLabel" text="H: 00H" style="-fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace;"/>
+            <Label fx:id="regLLabel" text="L: 00H" style="-fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace;"/>
+
+            <Separator style="-fx-background-color: #333333;"/>
+
+            <Label text="Pointers" style="-fx-text-fill: #888888; -fx-font-size: 11px;"/>
+            <Label fx:id="regPCLabel" text="PC: 0000H" style="-fx-text-fill: #c586c0; -fx-font-family: 'Consolas', monospace;"/>
+            <Label fx:id="regSPLabel" text="SP: FFFFH" style="-fx-text-fill: #c586c0; -fx-font-family: 'Consolas', monospace;"/>
+
+            <Separator style="-fx-background-color: #333333;"/>
+
+            <Label text="Flags" style="-fx-text-fill: #888888; -fx-font-size: 11px;"/>
+            <HBox spacing="15">
+                <Label fx:id="flagSLabel" text="S: 0" style="-fx-text-fill: #4ec9b0;"/>
+                <Label fx:id="flagZLabel" text="Z: 0" style="-fx-text-fill: #4ec9b0;"/>
+                <Label fx:id="flagACLabel" text="AC: 0" style="-fx-text-fill: #4ec9b0;"/>
+            </HBox>
+            <HBox spacing="15">
+                <Label fx:id="flagPLabel" text="P: 0" style="-fx-text-fill: #4ec9b0;"/>
+                <Label fx:id="flagCYLabel" text="CY: 0" style="-fx-text-fill: #4ec9b0;"/>
+            </HBox>
+        </VBox>
+    </StackPane>
+</VBox>

@@ -66,15 +66,5 @@ public class CPU {
         }
     }
 
-    public int getRegisterA() {
-        return this.a;
-    }
 
-    public int getPc() {
-        return this.pc;
-    }
-
-    public void setPc(int pc) {
-        this.pc = pc & 0xFFFF;
-    }
 }

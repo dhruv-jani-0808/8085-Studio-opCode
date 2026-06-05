@@ -2,6 +2,7 @@ package studio.ide.ui;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -13,11 +14,11 @@ import studio.ide.emulator.Memory;
 
 public class MemoryTableView {
 
-    private TableView<MemoryRow> memoryTable;
-    private TableColumn<MemoryRow, String> hexAddrCol;
-    private TableColumn<MemoryRow, Integer> decAddrCol;
-    private TableColumn<MemoryRow, String> dataCol; // Changed type to String to support flexible editing
-    private TextField searchField;
+    @FXML private TableView<MemoryRow> memoryTable;
+    @FXML private TableColumn<MemoryRow, String> hexAddrCol;
+    @FXML private TableColumn<MemoryRow, Integer> decAddrCol;
+    @FXML private TableColumn<MemoryRow, String> dataCol; // Changed type to String to support flexible editing
+    @FXML private TextField searchField;
 
     private final ObservableList<MemoryRow> masterMemoryData = FXCollections.observableArrayList();
 
@@ -50,7 +51,7 @@ public class MemoryTableView {
                 }
 
                 row.setDataValue(parsedValue);
-                memory.write(row.getDecimalAddress(), (byte) parsedValue);
+                memoryTable.refresh();
             }
             catch (Exception e) {
                 showErrorDialog("Invalid Data Value",
@@ -69,7 +70,7 @@ public class MemoryTableView {
     public void populateCompleteGrid(Memory memory) {
         masterMemoryData.clear();
         for (int i = 0; i < 65536; i++) {
-            masterMemoryData.add(new MemoryRow(i, memory.read(i) & 0xFF));
+            masterMemoryData.add(new MemoryRow(i, memory));
         }
     }
 
@@ -77,17 +78,7 @@ public class MemoryTableView {
      * Live UI update hook that syncs memory values into the view grid panel.
      */
     public void refreshMemoryGrid(Memory memory) {
-        if (memory == null) return;
-
-        boolean needsRefresh = false;
-        for (MemoryRow row : masterMemoryData) {
-            int currentVal = memory.read(row.getDecimalAddress()) & 0xFF;
-            if (row.getDataValue() != currentVal) {
-                row.setDataValue(currentVal);
-                needsRefresh = true;
-            }
-        }
-        if (needsRefresh) {
+        if (memoryTable != null) {
             memoryTable.refresh();
         }
     }
@@ -95,6 +86,7 @@ public class MemoryTableView {
     /**
      * Action bound to your search bar trigger. Matches radix endings automatically.
      */
+    @FXML
     public void handleAddressSearch() {
         String query = searchField.getText().trim().toUpperCase();
         if (query.isEmpty()) return;

@@ -1,15 +1,17 @@
 package studio.ide.ui;
 
+import studio.ide.emulator.Memory;
+
 public class MemoryRow {
 
     private final String hexAddress;
     private final int decimalAddress;
-    private int dataValue;
+    private final Memory memory;
 
-    public MemoryRow(int address, int value) {
-        this.hexAddress = String.format("%04X", address);
+    public MemoryRow(int address, Memory memory) {
+        this.hexAddress = String.format("%04XH", address);
         this.decimalAddress = address;
-        this.dataValue = value;
+        this.memory = memory;
     }
 
     public String getHexAddress() {
@@ -20,15 +22,12 @@ public class MemoryRow {
         return decimalAddress;
     }
 
-    public int getDataValue() {
-        return dataValue;
-    }
-
     public String getDataValueDisplay() {
-        return String.format("%02X", dataValue);
+        int liveValue = memory.read(decimalAddress) & 0xFF;
+        return String.format("%02X", liveValue);
     }
 
     public void setDataValue(int dataValue) {
-        this.dataValue = dataValue & 0xFF;
+        memory.write(decimalAddress, (byte) dataValue);
     }
 }

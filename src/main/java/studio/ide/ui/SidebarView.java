@@ -7,20 +7,20 @@ import studio.ide.emulator.CPU;
 
 public class SidebarView {
 
-    private Label sidebarTitleLabel;
-    private VBox fileExplorerPane;
-    private VBox registersPane;
-    private Label regALabel, regBLabel, regCLabel, regDLabel, regELabel, regHLabel, regLLabel;
-    private Label regPCLabel, regSPLabel;
-    private Label flagZLabel, flagSLabel, flagCYLabel, flagPLabel, flagACLabel;
+    @FXML private Label sidebarTitleLabel;
+    @FXML private VBox fileExplorerPane;
+    @FXML private VBox registersPane;
+    @FXML private Label regALabel, regBLabel, regCLabel, regDLabel, regELabel, regHLabel, regLLabel;
+    @FXML private Label regPCLabel, regSPLabel;
+    @FXML private Label flagZLabel, flagSLabel, flagCYLabel, flagPLabel, flagACLabel;
 
-    public void updateReigsters(CPU cpu) {
+    public void updateRegisters(CPU cpu) {
         if(cpu == null) return;
 
         /**
          * Updates all the text labels in the register pane with live data from the CPU core.
          */
-        regALabel.setText(String.format("A: %02XH", cpu.getRegisterA()));
+        regALabel.setText(String.format("A: %02XH", cpu.a));
         regBLabel.setText(String.format("B: %02XH", cpu.b));
         regCLabel.setText(String.format("C: %02XH", cpu.c));
         regDLabel.setText(String.format("D: %02XH", cpu.d));
@@ -28,7 +28,7 @@ public class SidebarView {
         regHLabel.setText(String.format("H: %02XH", cpu.h));
         regLLabel.setText(String.format("L: %02XH", cpu.l));
 
-        regPCLabel.setText(String.format("PC: %04XH", cpu.getPc()));
+        regPCLabel.setText(String.format("PC: %04XH", cpu.pc));
         regSPLabel.setText(String.format("SP: %04XH", cpu.sp));
 
         flagZLabel.setText(String.format("Z: %d", cpu.flagZ ? 1 : 0));
@@ -46,11 +46,18 @@ public class SidebarView {
         if (showRegisters) {
             sidebarTitleLabel.setText("Registers & Flags");
             fileExplorerPane.setVisible(false);
+            fileExplorerPane.setManaged(false);
             registersPane.setVisible(true);
+            registersPane.setManaged(true);
         } else {
             sidebarTitleLabel.setText("File Explorer");
             fileExplorerPane.setVisible(true);
+            fileExplorerPane.setManaged(true);
             registersPane.setVisible(false);
+            registersPane.setManaged(false);
         }
     }
+
+    @FXML public void triggerShowFiles() { toggleView(false); }
+    @FXML public void triggerShowRegisters() { toggleView(true); }
 }

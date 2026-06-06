@@ -665,7 +665,7 @@ public class InstructionSet {
         setZSP(cpu, result);
         int twosComp = 0xFF;
         int aluAddn = val + twosComp;
-        cpu.flagAC = ((val ^ twosComp ^ aluAddn) * 0x10) != 0;
+        cpu.flagAC = ((val ^ twosComp ^ aluAddn) & 0x10) != 0;
         return result & 0xFF;
     }
 

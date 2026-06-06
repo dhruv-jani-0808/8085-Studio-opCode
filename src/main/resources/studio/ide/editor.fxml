@@ -6,13 +6,16 @@
       fx:controller="studio.ide.ui.EditorView"
       style="-fx-background-color: #1e1e1e;">
 
-    <HBox spacing="5" style="-fx-padding: 5 10 5 10; -fx-background-color: #2d2d2d;">
-        <Button text="Open File" onAction="#handleOpenFile" style="-fx-background-color: transparent; -fx-text-fill: #cccccc; -fx-cursor: hand;"/>
-        <Button text="Save" onAction="#handleSaveFile" style="-fx-background-color: transparent; -fx-text-fill: #cccccc; -fx-cursor: hand;"/>
-        <Button text="Save As..." onAction="#handleSaveAsFile" style="-fx-background-color: transparent; -fx-text-fill: #cccccc; -fx-cursor: hand;"/>
+    <HBox VBox.vgrow="ALWAYS" style="-fx-background-color: #1e1e1e;">
+        <!-- Column for Line Numbers -->
+        <TextArea fx:id="lineNumbersArea"
+                  prefWidth="40"
+                  editable="false"
+                  focusTraversable="false"
+                  style="-fx-control-inner-background: #1e1e1e; -fx-text-fill: #858585; -fx-font-family: 'Consolas', monospace; -fx-font-size: 16px; -fx-background-color: transparent; -fx-border-width: 0; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-padding: 0;"/>
+        <!-- Main Assembly Code Area -->
+        <TextArea fx:id="mainCodeEditor"
+                  HBox.hgrow="ALWAYS"
+                  style="-fx-control-inner-background: #1e1e1e; -fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace; -fx-font-size: 16px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent; -fx-padding: 0;"/>
     </HBox>
-
-    <TextArea fx:id="mainCodeEditor"
-              VBox.vgrow="ALWAYS"
-              style="-fx-control-inner-background: #1e1e1e; -fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace; -fx-font-size: 14px; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;"/>
 </VBox>

@@ -8,11 +8,16 @@
       style="-fx-background-color: #252526; -fx-border-color: #333333; -fx-border-width: 0 0 0 1;">
 
     <HBox spacing="5" style="-fx-padding: 10;">
-        <TextField fx:id="searchField" promptText="Search Address (e.g. 2000H)" HBox.hgrow="ALWAYS" style="-fx-background-color: #3c3c3c; -fx-text-fill: white;"/>
-        <Button text="Go" onAction="#handleAddressSearch" style="-fx-background-color: #0e639c; -fx-text-fill: white;"/>
+        <TextField fx:id="searchField" 
+                   promptText="Search Address (e.g. 2000H)" 
+                   HBox.hgrow="ALWAYS" 
+                   style="-fx-background-color: #3c3c3c; -fx-text-fill: white; -fx-font-size: 15px; -fx-prompt-text-fill: #bbbbbb;"/>
+        <Button text="Go" 
+                onAction="#handleAddressSearch" 
+                style="-fx-background-color: #0e639c; -fx-text-fill: white; -fx-font-size: 15px; -fx-cursor: hand;"/>
     </HBox>
 
-    <TableView fx:id="memoryTable" VBox.vgrow="ALWAYS" style="-fx-base: #1e1e1e; -fx-control-inner-background: #1e1e1e; -fx-table-cell-border-color: #333333;">
+    <TableView fx:id="memoryTable" VBox.vgrow="ALWAYS" style="-fx-base: #1e1e1e; -fx-control-inner-background: #1e1e1e; -fx-table-cell-border-color: #333333; -fx-font-size: 15px; -fx-font-family: 'Consolas', monospace;">
         <columns>
             <TableColumn fx:id="hexAddrCol" text="Address" prefWidth="90" style="-fx-alignment: CENTER; -fx-text-fill: #c586c0;"/>
             <TableColumn fx:id="decAddrCol" text="Decimal" prefWidth="90" style="-fx-alignment: CENTER; -fx-text-fill: #888888;"/>

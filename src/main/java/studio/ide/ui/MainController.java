@@ -14,6 +14,9 @@ public class MainController {
 
     @FXML private Button executeBtn;
     @FXML private Button stepBtn;
+    @FXML private Button openFileBtn;
+    @FXML private Button saveBtn;
+    @FXML private Button saveAsBtn;
 
     @FXML private SidebarView sidebarController;
     @FXML private EditorView editorController;
@@ -31,6 +34,10 @@ public class MainController {
         memoryTableController.initializeMemoryTable(memory);
 
         sidebarController.updateRegisters(cpu);
+
+        openFileBtn.setOnAction(event -> editorController.handleOpenFile());
+        saveBtn.setOnAction(event -> editorController.handleSaveFile());
+        saveAsBtn.setOnAction(event -> editorController.handleSaveAsFile());
 
         executeBtn.setOnAction(event -> handleExecute());
         stepBtn.setOnAction(event -> handleStep());

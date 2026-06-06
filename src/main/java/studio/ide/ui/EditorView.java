@@ -8,10 +8,48 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import javafx.application.Platform;
+import javafx.scene.control.ScrollBar;
+
 
 public class EditorView {
     @FXML private TextArea mainCodeEditor;
+    @FXML private TextArea lineNumbersArea; // Add this line
     private File currentOpenFile = null;
+    @FXML
+    public void initialize() {
+        // Update line numbers dynamically as the user types
+        mainCodeEditor.textProperty().addListener((observable, oldValue, newValue) -> {
+            updateLineNumbers();
+        });
+        updateLineNumbers();
+        // Synchronize line-number scrolling with the main code editor
+        mainCodeEditor.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                Platform.runLater(() -> {
+                    ScrollBar scrollMain = (ScrollBar) mainCodeEditor.lookup(".scroll-bar:vertical");
+                    ScrollBar scrollLines = (ScrollBar) lineNumbersArea.lookup(".scroll-bar:vertical");
+                    if (scrollMain != null && scrollLines != null) {
+                        scrollLines.valueProperty().bind(scrollMain.valueProperty());
+
+                        // Hide the scrollbar of the line numbers panel entirely
+                        scrollLines.setPrefWidth(0);
+                        scrollLines.setVisible(false);
+                        scrollLines.setDisable(true);
+                    }
+                });
+            }
+        });
+    }
+    private void updateLineNumbers() {
+        String text = mainCodeEditor.getText();
+        int lineCount = text.split("\n", -1).length;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i <= lineCount; i++) {
+            sb.append(i).append("\n");
+        }
+        lineNumbersArea.setText(sb.toString());
+    }
 
     /**
      * Simple getter so MainController can grab the source string to feed into the compiler.

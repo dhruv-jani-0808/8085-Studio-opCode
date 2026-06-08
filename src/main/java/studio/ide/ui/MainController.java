@@ -14,9 +14,13 @@ public class MainController {
 
     @FXML private Button executeBtn;
     @FXML private Button stepBtn;
-    @FXML private Button openFileBtn;
-    @FXML private Button saveBtn;
-    @FXML private Button saveAsBtn;
+
+    @FXML private Button fileButton;
+    @FXML private javafx.scene.control.ContextMenu fileContextMenu;
+    @FXML private javafx.scene.control.MenuItem newFileMenuItem;
+    @FXML private javafx.scene.control.MenuItem openFileMenuItem;
+    @FXML private javafx.scene.control.MenuItem saveMenuItem;
+    @FXML private javafx.scene.control.MenuItem saveAsMenuItem;
 
     @FXML private SidebarView sidebarController;
     @FXML private EditorView editorController;
@@ -35,9 +39,26 @@ public class MainController {
 
         sidebarController.updateRegisters(cpu);
 
-        openFileBtn.setOnAction(event -> editorController.handleOpenFile());
-        saveBtn.setOnAction(event -> editorController.handleSaveFile());
-        saveAsBtn.setOnAction(event -> editorController.handleSaveAsFile());
+        // Open the dropdown ContextMenu on hover
+        fileButton.setOnMouseEntered(event -> {
+            fileContextMenu.show(fileButton, javafx.geometry.Side.BOTTOM, 0, 0);
+        });
+
+        newFileMenuItem.setOnAction(event -> editorController.handleNewFile());
+        openFileMenuItem.setOnAction(event -> editorController.handleOpenFile());
+        saveMenuItem.setOnAction(event -> editorController.handleSaveFile());
+        saveAsMenuItem.setOnAction(event -> editorController.handleSaveAsFile());
+
+        // Sync editor opened file with sidebar folder view
+        editorController.setOnFileOpened(file -> {
+            sidebarController.openDirectory(file.getParentFile());
+            sidebarController.toggleView(false); // Switch sidebar to Files list
+        });
+
+        // Double-click file in sidebar to load it in editor
+        sidebarController.setOnFileSelected(file -> {
+            editorController.loadFile(file);
+        });
 
         executeBtn.setOnAction(event -> handleExecute());
         stepBtn.setOnAction(event -> handleStep());
@@ -69,24 +90,11 @@ public class MainController {
 
                 cpu.step();
 
-                try {
-                    Thread.sleep(50);
-                }
-                catch(InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-
                 safetyCounter++;
                 if(safetyCounter > 2000) {
                     Platform.runLater(() -> showInfo("Safety Limit Reached", "Execution aborted: exceeded threshold of 2000 instructions."));
                     break;
                 }
-
-                Platform.runLater(() -> {
-                    sidebarController.updateRegisters(cpu);
-                    memoryTableController.refreshMemoryGrid(memory);
-                });
             }
 
             Platform.runLater(() -> {

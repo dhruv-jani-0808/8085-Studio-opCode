@@ -19,9 +19,9 @@
 
     <StackPane VBox.vgrow="ALWAYS">
 
-        <VBox fx:id="fileExplorerPane" visible="false" managed="false" style="-fx-padding: 10;">
-            <Label text="Working Directory" style="-fx-text-fill: #888888; -fx-font-size: 14px;"/>
-            <Label text="No folder opened." style="-fx-text-fill: #d4d4d4; -fx-padding: 10 0 0 0; -fx-font-size: 14px;"/>
+        <VBox fx:id="fileExplorerPane" visible="false" managed="false" spacing="8" style="-fx-padding: 10;" VBox.vgrow="ALWAYS">
+            <Label fx:id="workingDirLabel" text="No folder opened" style="-fx-text-fill: #888888; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+            <ListView fx:id="fileListView" VBox.vgrow="ALWAYS" style="-fx-background-color: #1e1e1e; -fx-base: #1e1e1e; -fx-control-inner-background: #1e1e1e; -fx-font-size: 13px; -fx-text-fill: #d4d4d4;"/>
         </VBox>
 
         <VBox fx:id="registersPane" spacing="10" style="-fx-padding: 10;">

@@ -10,12 +10,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import javafx.application.Platform;
 import javafx.scene.control.ScrollBar;
+import java.util.function.Consumer;
 
 
 public class EditorView {
     @FXML private TextArea mainCodeEditor;
     @FXML private TextArea lineNumbersArea; // Add this line
     private File currentOpenFile = null;
+    private Consumer<File> onFileOpenedCallback = null;
+
+    public void setOnFileOpened(Consumer<File> callback) {
+        this.onFileOpenedCallback = callback;
+    }
     @FXML
     public void initialize() {
         // Update line numbers dynamically as the user types
@@ -74,14 +80,21 @@ public class EditorView {
 
         File selectedFile = fileChooser.showOpenDialog(stage);
         if(selectedFile != null) {
-            try {
-                String content = Files.readString(selectedFile.toPath());
-                mainCodeEditor.setText(content);
-                currentOpenFile = selectedFile;
+            loadFile(selectedFile);
+        }
+    }
+
+    public void loadFile(File file) {
+        try {
+            String content = Files.readString(file.toPath());
+            mainCodeEditor.setText(content);
+            currentOpenFile = file;
+            if (onFileOpenedCallback != null) {
+                onFileOpenedCallback.accept(file);
             }
-            catch (IOException e) {
-                showError("File Error", "Failed to access file:\n" + e.getMessage());
-            }
+        }
+        catch (IOException e) {
+            showError("File Error", "Failed to access file:\n" + e.getMessage());
         }
     }
 
@@ -122,6 +135,15 @@ public class EditorView {
                 showError("File Error", "Failed to access file:\n" + e.getMessage());
             }
         }
+    }
+
+    /**
+     * Clears the current editor workspace and resets the file pointer.
+     */
+    @FXML
+    public void handleNewFile() {
+        mainCodeEditor.clear();
+        currentOpenFile = null;
     }
 
     // A quick helper method to display GUI error popups

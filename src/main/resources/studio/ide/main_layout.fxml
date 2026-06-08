@@ -3,16 +3,28 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="studio.ide.ui.MainController"
             style="-fx-background-color: #1e1e1e;">
 
     <top>
-        <HBox spacing="15" style="-fx-background-color: #2d2d2d; -fx-padding: 8 15 8 15; -fx-border-color: #333333; -fx-border-width: 0 0 1 0; -fx-alignment: CENTER_LEFT;">
-            <Button fx:id="openFileBtn" text="Open File" style="-fx-background-color: transparent; -fx-text-fill: #cccccc; -fx-cursor: hand; -fx-font-size: 14px;"/>
-            <Button fx:id="saveBtn" text="Save" style="-fx-background-color: transparent; -fx-text-fill: #cccccc; -fx-cursor: hand; -fx-font-size: 14px;"/>
-            <Button fx:id="saveAsBtn" text="Save As..." style="-fx-background-color: transparent; -fx-text-fill: #cccccc; -fx-cursor: hand; -fx-font-size: 14px;"/>
+        <HBox spacing="15" style="-fx-background-color: #2d2d2d; -fx-padding: 5 15 5 15; -fx-border-color: #333333; -fx-border-width: 0 0 1 0; -fx-alignment: CENTER_LEFT;">
+            <!-- File Button with nested ContextMenu for hover behavior -->
+            <Button fx:id="fileButton" text="File" style="-fx-background-color: #4d4d4d; -fx-text-fill: white; -fx-font-size: 14px; -fx-cursor: hand;">
+                <contextMenu>
+                    <ContextMenu fx:id="fileContextMenu">
+                        <items>
+                            <MenuItem fx:id="newFileMenuItem" text="New File          Ctrl+N" style="-fx-font-size: 13px;"/>
+                            <MenuItem fx:id="openFileMenuItem" text="Open File         Ctrl+O" style="-fx-font-size: 13px;"/>
+                            <MenuItem fx:id="saveMenuItem" text="Save              Ctrl+S" style="-fx-font-size: 13px;"/>
+                            <MenuItem fx:id="saveAsMenuItem" text="Save As..." style="-fx-font-size: 13px;"/>
+                        </items>
+                    </ContextMenu>
+                </contextMenu>
+            </Button>
             
             <Pane HBox.hgrow="NEVER" prefWidth="15"/>
             

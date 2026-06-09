@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.control.ScrollPane?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="studio.ide.ui.SidebarView"
+      prefWidth="240"
+      minWidth="200"
+      style="-fx-background-color: #252526;
+             -fx-border-color: #1e1e1e;
+             -fx-border-width: 0 1 0 0;">
+
+    <!-- ── Panel Header row ── -->
+    <HBox style="-fx-padding: 7 8 7 12;
+                 -fx-alignment: CENTER_LEFT;
+                 -fx-min-height: 34;
+                 -fx-background-color: #252526;">
+
+        <Label fx:id="sidebarTitleLabel" text="EXPLORER"
+               style="-fx-text-fill: #cccccc;
+                       -fx-font-size: 13px;
+                       -fx-font-weight: bold;"/>
+
+        <!-- Spacer pushes buttons to the far right -->
+        <Pane HBox.hgrow="ALWAYS"/>
+
+        <!-- File action icon buttons – shown only in file explorer view -->
+        <HBox fx:id="fileActionsBar" spacing="0" visible="true" managed="true"
+              style="-fx-alignment: CENTER;">
+            <Button fx:id="newFileIconBtn"  text="+"
+                    onAction="#handleNewFileInDir"
+                    focusTraversable="false"
+                    style="-fx-background-color: transparent;
+                           -fx-text-fill: #cccccc;
+                           -fx-font-size: 17px;
+                           -fx-cursor: hand;
+                           -fx-padding: 0 7 0 7;
+                           -fx-min-height: 28;
+                           -fx-max-height: 28;
+                           -fx-alignment: CENTER;
+                           -fx-background-radius: 4;"
+            />
+            <Button fx:id="newFolderIconBtn" text="&#8862;"
+                    onAction="#handleNewFolderInDir"
+                    focusTraversable="false"
+                    style="-fx-background-color: transparent;
+                           -fx-text-fill: #cccccc;
+                           -fx-font-size: 17px;
+                           -fx-cursor: hand;
+                           -fx-padding: 0 7 0 7;
+                           -fx-min-height: 28;
+                           -fx-max-height: 28;
+                           -fx-alignment: CENTER;
+                           -fx-background-radius: 4;"
+            />
+            <Button fx:id="refreshIconBtn" text="&#8635;"
+                    onAction="#handleRefreshExplorer"
+                    focusTraversable="false"
+                    style="-fx-background-color: transparent;
+                           -fx-text-fill: #cccccc;
+                           -fx-font-size: 17px;
+                           -fx-cursor: hand;
+                           -fx-padding: 0 7 0 7;
+                           -fx-min-height: 28;
+                           -fx-max-height: 28;
+                           -fx-alignment: CENTER;
+                           -fx-background-radius: 4;"
+            />
+        </HBox>
+    </HBox>
+
+    <Separator style="-fx-background-color: #3e3e3e;"/>
+
+    <!-- ── Main panel body (file tree OR registers) ── -->
+    <StackPane VBox.vgrow="ALWAYS">
+
+        <!-- ── File Explorer pane ── -->
+        <VBox fx:id="fileExplorerPane" visible="false" managed="false" VBox.vgrow="ALWAYS">
+            <Label fx:id="workingDirLabel" text="No folder opened"
+                   style="-fx-text-fill: #6a6a6a;
+                           -fx-font-size: 12px;
+                           -fx-font-style: italic;
+                           -fx-padding: 6 12 4 14;"/>
+
+            <TreeView fx:id="fileTreeView" VBox.vgrow="ALWAYS"
+                      style="-fx-background-color: #252526;
+                             -fx-base: #252526;
+                             -fx-control-inner-background: #252526;
+                             -fx-font-size: 14px;
+                             -fx-font-family: 'Segoe UI', sans-serif;
+                             -fx-border-width: 0;
+                             -fx-focus-color: transparent;
+                             -fx-faint-focus-color: transparent;"/>
+        </VBox>
+
+        <!-- ── Registers & Flags pane ── -->
+        <ScrollPane fx:id="registersScrollPane"
+                    fitToWidth="true"
+                    style="-fx-background-color: #252526;
+                           -fx-background: #252526;
+                           -fx-border-width: 0;
+                           -fx-focus-color: transparent;
+                           -fx-faint-focus-color: transparent;"
+                    VBox.vgrow="ALWAYS">
+
+            <VBox fx:id="registersPane" spacing="0"
+                  style="-fx-padding: 14 14 14 14; -fx-background-color: #252526;">
+
+                <!-- MAIN REGISTERS section -->
+                <Label text="MAIN REGISTERS"
+                       style="-fx-text-fill: #7a8ba8;
+                               -fx-font-size: 12px;
+                               -fx-font-weight: bold;
+                               -fx-padding: 0 0 8 0;"/>
+
+                <!-- Accumulator - highlighted blue -->
+                <HBox style="-fx-background-color: #1a2635;
+                             -fx-background-radius: 5;
+                             -fx-padding: 8 12 8 12;
+                             -fx-margin: 0 0 6 0;">
+                    <Label text="A" style="-fx-text-fill: #8b9bb8; -fx-font-size: 12px; -fx-font-weight: bold; -fx-min-width: 18;"/>
+                    <Label fx:id="regALabel" text="00H"
+                           style="-fx-text-fill: #4fc3f7;
+                                   -fx-font-family: 'Consolas', monospace;
+                                   -fx-font-size: 16px;
+                                   -fx-font-weight: bold;"
+                           HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <Pane prefHeight="4"/>
+
+                <!-- BC pair -->
+                <HBox spacing="6">
+                    <HBox style="-fx-background-color: #1e2030; -fx-background-radius: 5; -fx-padding: 7 10 7 12;" HBox.hgrow="ALWAYS">
+                        <Label text="B" style="-fx-text-fill: #8b9bb8; -fx-font-size: 12px; -fx-font-weight: bold; -fx-min-width: 14;"/>
+                        <Label fx:id="regBLabel" text="00H" style="-fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace; -fx-font-size: 15px;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                    <HBox style="-fx-background-color: #1e2030; -fx-background-radius: 5; -fx-padding: 7 10 7 12;" HBox.hgrow="ALWAYS">
+                        <Label text="C" style="-fx-text-fill: #8b9bb8; -fx-font-size: 12px; -fx-font-weight: bold; -fx-min-width: 14;"/>
+                        <Label fx:id="regCLabel" text="00H" style="-fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace; -fx-font-size: 15px;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                </HBox>
+                <Pane prefHeight="4"/>
+
+                <!-- DE pair -->
+                <HBox spacing="6">
+                    <HBox style="-fx-background-color: #1e2030; -fx-background-radius: 5; -fx-padding: 7 10 7 12;" HBox.hgrow="ALWAYS">
+                        <Label text="D" style="-fx-text-fill: #8b9bb8; -fx-font-size: 12px; -fx-font-weight: bold; -fx-min-width: 14;"/>
+                        <Label fx:id="regDLabel" text="00H" style="-fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace; -fx-font-size: 15px;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                    <HBox style="-fx-background-color: #1e2030; -fx-background-radius: 5; -fx-padding: 7 10 7 12;" HBox.hgrow="ALWAYS">
+                        <Label text="E" style="-fx-text-fill: #8b9bb8; -fx-font-size: 12px; -fx-font-weight: bold; -fx-min-width: 14;"/>
+                        <Label fx:id="regELabel" text="00H" style="-fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace; -fx-font-size: 15px;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                </HBox>
+                <Pane prefHeight="4"/>
+
+                <!-- HL pair -->
+                <HBox spacing="6">
+                    <HBox style="-fx-background-color: #1e2030; -fx-background-radius: 5; -fx-padding: 7 10 7 12;" HBox.hgrow="ALWAYS">
+                        <Label text="H" style="-fx-text-fill: #8b9bb8; -fx-font-size: 12px; -fx-font-weight: bold; -fx-min-width: 14;"/>
+                        <Label fx:id="regHLabel" text="00H" style="-fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace; -fx-font-size: 15px;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                    <HBox style="-fx-background-color: #1e2030; -fx-background-radius: 5; -fx-padding: 7 10 7 12;" HBox.hgrow="ALWAYS">
+                        <Label text="L" style="-fx-text-fill: #8b9bb8; -fx-font-size: 12px; -fx-font-weight: bold; -fx-min-width: 14;"/>
+                        <Label fx:id="regLLabel" text="00H" style="-fx-text-fill: #d4d4d4; -fx-font-family: 'Consolas', monospace; -fx-font-size: 15px;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                </HBox>
+
+                <Pane prefHeight="14"/>
+                <Separator style="-fx-background-color: #3e3e3e;"/>
+                <Pane prefHeight="10"/>
+
+                <!-- FLAGS section -->
+                <Label text="FLAGS"
+                       style="-fx-text-fill: #7a8ba8;
+                               -fx-font-size: 12px;
+                               -fx-font-weight: bold;
+                               -fx-padding: 0 0 8 0;"/>
+
+                <HBox spacing="6">
+                    <!-- Sign -->
+                    <VBox style="-fx-background-color: #1e2a25; -fx-background-radius: 5; -fx-padding: 7 0 7 0; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="S" style="-fx-text-fill: #8b9bb8; -fx-font-size: 11px; -fx-font-weight: bold; -fx-alignment: CENTER;" maxWidth="Infinity"/>
+                        <Label fx:id="flagSLabel" text="0" style="-fx-text-fill: #4ec9b0; -fx-font-family: 'Consolas', monospace; -fx-font-size: 16px; -fx-font-weight: bold; -fx-alignment: CENTER;" maxWidth="Infinity"/>
+                    </VBox>
+                    <!-- Zero -->
+                    <VBox style="-fx-background-color: #1e2a25; -fx-background-radius: 5; -fx-padding: 7 0 7 0; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="Z" style="-fx-text-fill: #8b9bb8; -fx-font-size: 11px; -fx-font-weight: bold; -fx-alignment: CENTER;" maxWidth="Infinity"/>
+                        <Label fx:id="flagZLabel" text="0" style="-fx-text-fill: #4ec9b0; -fx-font-family: 'Consolas', monospace; -fx-font-size: 16px; -fx-font-weight: bold; -fx-alignment: CENTER;" maxWidth="Infinity"/>
+                    </VBox>
+                    <!-- Aux Carry -->
+                    <VBox style="-fx-background-color: #1e2a25; -fx-background-radius: 5; -fx-padding: 7 0 7 0; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="AC" style="-fx-text-fill: #8b9bb8; -fx-font-size: 11px; -fx-font-weight: bold; -fx-alignment: CENTER;" maxWidth="Infinity"/>
+                        <Label fx:id="flagACLabel" text="0" style="-fx-text-fill: #4ec9b0; -fx-font-family: 'Consolas', monospace; -fx-font-size: 16px; -fx-font-weight: bold; -fx-alignment: CENTER;" maxWidth="Infinity"/>
+                    </VBox>
+                    <!-- Parity -->
+                    <VBox style="-fx-background-color: #1e2a25; -fx-background-radius: 5; -fx-padding: 7 0 7 0; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="P" style="-fx-text-fill: #8b9bb8; -fx-font-size: 11px; -fx-font-weight: bold; -fx-alignment: CENTER;" maxWidth="Infinity"/>
+                        <Label fx:id="flagPLabel" text="0" style="-fx-text-fill: #4ec9b0; -fx-font-family: 'Consolas', monospace; -fx-font-size: 16px; -fx-font-weight: bold; -fx-alignment: CENTER;" maxWidth="Infinity"/>
+                    </VBox>
+                    <!-- Carry -->
+                    <VBox style="-fx-background-color: #1e2a25; -fx-background-radius: 5; -fx-padding: 7 0 7 0; -fx-alignment: CENTER;" HBox.hgrow="ALWAYS">
+                        <Label text="CY" style="-fx-text-fill: #8b9bb8; -fx-font-size: 11px; -fx-font-weight: bold; -fx-alignment: CENTER;" maxWidth="Infinity"/>
+                        <Label fx:id="flagCYLabel" text="0" style="-fx-text-fill: #4ec9b0; -fx-font-family: 'Consolas', monospace; -fx-font-size: 16px; -fx-font-weight: bold; -fx-alignment: CENTER;" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
+
+                <Pane prefHeight="14"/>
+                <Separator style="-fx-background-color: #3e3e3e;"/>
+                <Pane prefHeight="10"/>
+
+                <!-- POINTERS section -->
+                <Label text="POINTERS"
+                       style="-fx-text-fill: #7a8ba8;
+                               -fx-font-size: 12px;
+                               -fx-font-weight: bold;
+                               -fx-padding: 0 0 8 0;"/>
+
+                <HBox style="-fx-background-color: #1e1e30; -fx-background-radius: 5; -fx-padding: 9 12 9 12; -fx-margin: 0 0 5 0;">
+                    <Label text="PC" style="-fx-text-fill: #8b9bb8; -fx-font-size: 12px; -fx-font-weight: bold; -fx-min-width: 28;"/>
+                    <Label fx:id="regPCLabel" text="0000H"
+                           style="-fx-text-fill: #c586c0;
+                                   -fx-font-family: 'Consolas', monospace;
+                                   -fx-font-size: 16px;
+                                   -fx-font-weight: bold;"
+                           HBox.hgrow="ALWAYS"/>
+                </HBox>
+                <Pane prefHeight="5"/>
+                <HBox style="-fx-background-color: #1e1e30; -fx-background-radius: 5; -fx-padding: 9 12 9 12;">
+                    <Label text="SP" style="-fx-text-fill: #8b9bb8; -fx-font-size: 12px; -fx-font-weight: bold; -fx-min-width: 28;"/>
+                    <Label fx:id="regSPLabel" text="FFFFH"
+                           style="-fx-text-fill: #c586c0;
+                                   -fx-font-family: 'Consolas', monospace;
+                                   -fx-font-size: 16px;
+                                   -fx-font-weight: bold;"
+                           HBox.hgrow="ALWAYS"/>
+                </HBox>
+
+                <Pane prefHeight="14"/>
+                <Separator style="-fx-background-color: #3e3e3e;"/>
+            </VBox>
+        </ScrollPane>
+    </StackPane>
+</VBox>

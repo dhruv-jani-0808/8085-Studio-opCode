@@ -21,14 +21,19 @@ public class Assembler {
     // We use Integer instead of byte to avoid Java's signed-byte precision errors during math.
     private final List<Integer> machineCode;
 
+    // Maps each assembled memory address → the 1-based source line number that produced it.
+    // Used by the IDE to highlight the current line while stepping.
+    private final Map<Integer, Integer> addressToLine;
+
     // Tracks our simulated memory address as we count instruction sizes to calculate where labels live.
     private int currentAddress;
 
     public Assembler() {
-        symbolTable = new HashMap<>();
-        parsedLines = new ArrayList<>();
-        machineCode = new ArrayList<>();
-        currentAddress = 0x0000; // Default starting address
+        symbolTable   = new HashMap<>();
+        parsedLines   = new ArrayList<>();
+        machineCode   = new ArrayList<>();
+        addressToLine = new HashMap<>();
+        currentAddress = 0x0000;
     }
 
     // --- The Main Public API ---
@@ -39,6 +44,7 @@ public class Assembler {
         symbolTable.clear();
         parsedLines.clear();
         machineCode.clear();
+        addressToLine.clear();
         currentAddress = 0x0000;
 
         // 2. Break the giant text editor string into a manageable array of individual lines
@@ -59,10 +65,10 @@ public class Assembler {
     // --- The Pipeline Methods ---
 
     private void passOne(String[] rawLines) {
-        for (String rawLine : rawLines) {
+        for (int lineIdx = 0; lineIdx < rawLines.length; lineIdx++) {
 
             // Send the messy string to our Lexer funnel to get a clean object
-            ParsedLine line = parseLine(rawLine);
+            ParsedLine line = parseLine(rawLines[lineIdx]);
 
             // If it was just an empty line or purely a comment, skip it completely
             if (line == null) continue;
@@ -74,6 +80,9 @@ public class Assembler {
 
             // Is there an actual instruction on this line? (Not just a floating label)
             if (line.mnemonic != null) {
+                // Record: this memory address was produced by source line (lineIdx + 1)
+                addressToLine.put(currentAddress, lineIdx + 1);
+
                 // Save it for Pass 2 so we never have to parse this string again
                 parsedLines.add(line);
 
@@ -86,7 +95,6 @@ public class Assembler {
                     // Advance our address counter so the next instruction gets the right memory slot!
                     currentAddress += data[1];
                 } else {
-                    // In a polished IDE, you would throw a custom exception here to highlight the text red
                     System.err.println("Syntax Error on Pass 1: Unknown instruction -> " + lookupString);
                 }
             }
@@ -251,5 +259,14 @@ public class Assembler {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Assembler Error: Unresolved literal token -> " + operand);
         }
+    }
+
+    /**
+     * Returns a read-only view of the address-to-source-line map built during the last assembly.
+     * Key   = 16-bit memory address (e.g. 0x0000)
+     * Value = 1-based line number in the source editor
+     */
+    public Map<Integer, Integer> getAddressToLine() {
+        return java.util.Collections.unmodifiableMap(addressToLine);
     }
 }

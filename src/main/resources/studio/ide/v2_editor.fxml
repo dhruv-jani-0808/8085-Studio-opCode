@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Label?>
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="studio.ide.ui.EditorView"
+      style="-fx-background-color: #1e1e1e;">
+
+    <!-- ── Tab Bar ── -->
+    <HBox fx:id="tabBar"
+          style="-fx-background-color: #2d2d2d;
+                 -fx-min-height: 35;
+                 -fx-max-height: 35;
+                 -fx-border-color: #252526;
+                 -fx-border-width: 0 0 1 0;">
+        <!-- Tabs are added dynamically by EditorView.java -->
+    </HBox>
+
+    <!-- ── Editor body: gutter + code area ── -->
+    <HBox VBox.vgrow="ALWAYS" style="-fx-background-color: #1e1e1e;">
+
+        <!-- Line-number gutter -->
+        <TextArea fx:id="lineNumbersArea"
+                  prefWidth="52"
+                  minWidth="52"
+                  maxWidth="52"
+                  editable="false"
+                  focusTraversable="false"
+                  style="-fx-control-inner-background: #1e1e1e;
+                         -fx-text-fill: #495162;
+                         -fx-font-family: 'Consolas', monospace;
+                         -fx-font-size: 16px;
+                         -fx-background-color: transparent;
+                         -fx-border-width: 0;
+                         -fx-focus-color: transparent;
+                         -fx-faint-focus-color: transparent;
+                         -fx-padding: 0;"/>
+
+        <!-- Hairline separator between gutter and editor -->
+        <Pane style="-fx-background-color: #333333;" prefWidth="1"/>
+
+        <!-- Main code text area -->
+        <TextArea fx:id="mainCodeEditor"
+                  HBox.hgrow="ALWAYS"
+                  promptText="Write your 8085 assembly code here..."
+                  style="-fx-control-inner-background: #1e1e1e;
+                         -fx-text-fill: #d4d4d4;
+                         -fx-prompt-text-fill: #3a3f4b;
+                         -fx-font-family: 'Consolas', monospace;
+                         -fx-font-size: 16px;
+                         -fx-focus-color: transparent;
+                         -fx-faint-focus-color: transparent;
+                         -fx-padding: 0;
+                         -fx-highlight-fill: #264f78;
+                         -fx-highlight-text-fill: #d4d4d4;"/>
+    </HBox>
+
+    <!-- ── Status Bar (VS Code style bottom strip) ── -->
+    <HBox style="-fx-background-color: #007acc;
+                 -fx-padding: 2 14 2 14;
+                 -fx-alignment: CENTER_LEFT;
+                 -fx-spacing: 18;
+                 -fx-min-height: 22;
+                 -fx-max-height: 22;">
+
+        <Label fx:id="statusFileLabel"
+               text="8085 Assembly"
+               style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+
+        <Pane HBox.hgrow="ALWAYS"/>
+
+        <Label fx:id="statusLineLabel"
+               text="Ln 1, Col 1"
+               style="-fx-text-fill: white; -fx-font-size: 12px;"/>
+    </HBox>
+
+</VBox>

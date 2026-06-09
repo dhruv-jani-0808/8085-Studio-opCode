@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Separator?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="studio.ide.ui.MainController"
+            style="-fx-background-color: #1e1e1e;">
+
+    <!-- ═══════════════════════════════════════════════════════
+         TOP TOOLBAR
+    ═══════════════════════════════════════════════════════ -->
+    <top>
+        <HBox style="-fx-background-color: #1a1a1a;
+                     -fx-padding: 0 12 0 0;
+                     -fx-border-color: #252526;
+                     -fx-border-width: 0 0 1 0;
+                     -fx-alignment: CENTER_LEFT;
+                     -fx-min-height: 38;">
+
+            <!-- App icon / brand label -->
+            <Label text="  8085 Studio opCode"
+                   style="-fx-text-fill: #9cdcfe;
+                           -fx-font-size: 13px;
+                           -fx-font-family: 'Consolas', monospace;
+                           -fx-font-weight: bold;
+                           -fx-padding: 0 18 0 10;"/>
+
+            <!-- File dropdown menu button -->
+            <Button fx:id="fileButton" text="File"
+                    focusTraversable="false"
+                    style="-fx-background-color: #3a3d41;
+                           -fx-text-fill: #cccccc;
+                           -fx-font-size: 13px;
+                           -fx-cursor: hand;
+                           -fx-padding: 6 18 6 18;
+                           -fx-background-radius: 4;">
+                <contextMenu>
+                    <ContextMenu fx:id="fileContextMenu">
+                        <items>
+                            <MenuItem fx:id="newFileMenuItem"  text="New File                Ctrl+N"/>
+                            <MenuItem fx:id="openFileMenuItem" text="Open File...            Ctrl+O"/>
+                            <SeparatorMenuItem/>
+                            <MenuItem fx:id="saveMenuItem"     text="Save                   Ctrl+S"/>
+                            <MenuItem fx:id="saveAsMenuItem"   text="Save As..."/>
+                        </items>
+                    </ContextMenu>
+                </contextMenu>
+            </Button>
+
+            <!-- Flexible spacer pushes run buttons to the right -->
+            <Pane HBox.hgrow="ALWAYS"/>
+
+            <!-- Run / Step buttons -->
+            <Button fx:id="executeBtn" text="▶  Run (F5)"
+                    focusTraversable="false"
+                    style="-fx-background-color: #0e639c;
+                           -fx-text-fill: white;
+                           -fx-font-weight: bold;
+                           -fx-font-size: 13px;
+                           -fx-cursor: hand;
+                           -fx-padding: 6 18 6 18;
+                           -fx-background-radius: 4;"/>
+
+            <Pane prefWidth="6"/>
+
+            <Button fx:id="stepBtn" text="⏭  Step (F10)"
+                    focusTraversable="false"
+                    style="-fx-background-color: #3a3d41;
+                           -fx-text-fill: #cccccc;
+                           -fx-font-size: 13px;
+                           -fx-cursor: hand;
+                           -fx-padding: 6 18 6 18;
+                           -fx-background-radius: 4;"/>
+        </HBox>
+    </top>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LEFT  =  Activity Bar  +  Sidebar panel
+    ═══════════════════════════════════════════════════════ -->
+    <left>
+        <HBox>
+            <!-- Narrow Activity Bar (VS Code style) -->
+            <VBox fx:id="activityBarBox"
+                  style="-fx-background-color: #2c2c2c;
+                         -fx-min-width: 48;
+                         -fx-max-width: 48;
+                         -fx-alignment: TOP_CENTER;
+                         -fx-padding: 8 0 0 0;
+                         -fx-spacing: 2;
+                         -fx-border-color: #1e1e1e;
+                         -fx-border-width: 0 1 0 0;">
+
+                <!-- Files icon button -->
+                <Button fx:id="activityFilesBtn"
+                        text="&#9707;"
+                        focusTraversable="false"
+                        style="-fx-background-color: transparent;
+                               -fx-text-fill: #858585;
+                               -fx-font-size: 20px;
+                               -fx-cursor: hand;
+                               -fx-min-width: 48;
+                               -fx-min-height: 48;
+                               -fx-border-color: transparent;
+                               -fx-border-width: 0 0 0 2;
+                               -fx-background-radius: 0;"/>
+
+                <!-- Registers icon button -->
+                <Button fx:id="activityRegsBtn"
+                        text="&#8801;"
+                        focusTraversable="false"
+                        style="-fx-background-color: transparent;
+                               -fx-text-fill: #858585;
+                               -fx-font-size: 22px;
+                               -fx-cursor: hand;
+                               -fx-min-width: 48;
+                               -fx-min-height: 48;
+                               -fx-border-color: transparent;
+                               -fx-border-width: 0 0 0 2;
+                               -fx-background-radius: 0;"/>
+            </VBox>
+
+            <!-- Sidebar panel (File explorer / Registers) -->
+            <fx:include source="v2_sidebar.fxml" fx:id="sidebar"/>
+        </HBox>
+    </left>
+
+    <!-- ═══════════════════════════════════════════════════════
+         CENTER  =  Code Editor
+    ═══════════════════════════════════════════════════════ -->
+    <center>
+        <fx:include source="v2_editor.fxml" fx:id="editor"/>
+    </center>
+
+    <!-- ═══════════════════════════════════════════════════════
+         RIGHT  =  Memory Table
+    ═══════════════════════════════════════════════════════ -->
+    <right>
+        <fx:include source="v2_memory_table.fxml" fx:id="memoryTable"/>
+    </right>
+
+</BorderPane>

@@ -1,8 +1,10 @@
 package studio.ide.ui;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -15,12 +17,39 @@ import studio.ide.emulator.Memory;
 public class MemoryTableView {
 
     @FXML private TableView<MemoryRow> memoryTable;
-    @FXML private TableColumn<MemoryRow, String> hexAddrCol;
+    @FXML private TableColumn<MemoryRow, String>  hexAddrCol;
     @FXML private TableColumn<MemoryRow, Integer> decAddrCol;
-    @FXML private TableColumn<MemoryRow, String> dataCol; // Changed type to String to support flexible editing
+    @FXML private TableColumn<MemoryRow, String>  dataCol;
     @FXML private TextField searchField;
 
     private final ObservableList<MemoryRow> masterMemoryData = FXCollections.observableArrayList();
+
+    @FXML
+    public void initialize() {
+        // After the scene attaches, color each column header label (Fix 7)
+        memoryTable.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                Platform.runLater(() -> styleColumnHeaders());
+            }
+        });
+    }
+
+    /** Applies distinct colours to the three column header labels. */
+    private void styleColumnHeaders() {
+        // JavaFX column header labels are found via CSS lookup after the skin is rendered
+        for (Node header : memoryTable.lookupAll(".column-header .label")) {
+            Node col = header.getParent(); // the column-header itself
+            if (col != null) {
+                String txt = ((javafx.scene.control.Label) header).getText();
+                switch (txt) {
+                    case "Address" -> header.setStyle("-fx-text-fill: #c586c0; -fx-font-weight: bold; -fx-font-size: 13px;");
+                    case "Decimal" -> header.setStyle("-fx-text-fill: #9cdcfe; -fx-font-weight: bold; -fx-font-size: 13px;");
+                    case "Data"    -> header.setStyle("-fx-text-fill: #ce9178; -fx-font-weight: bold; -fx-font-size: 13px;");
+                    default        -> header.setStyle("-fx-text-fill: #d4d4d4; -fx-font-weight: bold; -fx-font-size: 13px;");
+                }
+            }
+        }
+    }
 
     /**
      * Call this inside initialize() to configure the grid columns and listeners.
